@@ -125,6 +125,17 @@ class MainWindow(QMainWindow):
         self.pushbutton_autodetection.clicked.connect(self.auto_detect)
 
 
+    def save_dialog(self):
+        self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
+        self.filepath = self.fname
+        pixmap = self.pix
+        obj = pixmap.toImage()
+        obj.save(self.filepath, "PNG")
+        self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
+
+
+
+
 
     def open_dialog(self):
         self.fname, _ = QFileDialog.getOpenFileName(self, 'Open file')
@@ -201,11 +212,6 @@ class MainWindow(QMainWindow):
 
 
 
-    def save_dialog(self):
-        self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file')
-        self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
-
-
     def set_format(self, i):
         if i == 0:
             self.format = YUVFormat.YUYV_LE
@@ -262,11 +268,11 @@ class MainWindow(QMainWindow):
                     or self.format == RGBFormat.XR24_BE or self.format == RGBFormat.RGBP_BE
                 ):
                 if not self.checkbox_r.isChecked():
-                    data['r'] = 0
+                    data['b'] = 0
                 if not self.checkbox_g.isChecked():
                     data['g'] = 0
                 if not self.checkbox_b.isChecked():
-                    data['b'] = 0
+                    data['r'] = 0
             elif (
                     self.format == RGBFormat.XR24_LE or self.format == RGBFormat.RGBP_LE
                     or self.format == RGBFormat.BGR3_BE or self.format == RGBFormat.RGB3_BE

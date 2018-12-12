@@ -212,17 +212,17 @@ class _Parser:
 
         for i in range(0, height):
             for j in range(0, int(width)):
-                pix_b = ord(f_rgb.read(1))
-                pix_g = ord(f_rgb.read(1))
                 pix_r = ord(f_rgb.read(1))
+                pix_g = ord(f_rgb.read(1))
+                pix_b = ord(f_rgb.read(1))
                 pix_a = ord(f_rgb.read(1))
 
                 (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
 
                 pix_a = 0
-                red = (pix_a * (pix_r / 255) + ((1 - pix_a) * (pix_r / 255))) * 255
+                blue = (pix_a * (pix_r / 255) + ((1 - pix_a) * (pix_r / 255))) * 255
                 green = (pix_a * (pix_g / 255) + ((1 - pix_a) * (pix_g / 255))) * 255
-                blue = (pix_a * (pix_b / 255) + ((1 - pix_a) * (pix_b / 255))) * 255
+                red = (pix_a * (pix_b / 255) + ((1 - pix_a) * (pix_b / 255))) * 255
 
                 pix[j, i] = int(blue), int(green), int(red)
 
@@ -242,13 +242,13 @@ class _Parser:
 
                 value = pix_l*256 + pix_h
 
-                red = (value & 0xF800) >> 8
+                blue = (value & 0xF800) >> 8
                 green = (value & 0x7E0) >> 3
-                blue = (value & 0x1F) << 3
+                red = (value & 0x1F) << 3
 
                 (blue, green, red) = self.choice_rgbval(blue, green, red)
 
-                pix[j, i] = int(blue), int(green), int(red)
+                pix[j, i] = int(red), int(green), int(blue)
 
 
         return image_out
@@ -257,10 +257,10 @@ class _Parser:
 
     def choice_rgbval(self, pix_b, pix_g, pix_r):
         if self._data_['b'] == 0:
-            pix_r = 0
+            pix_b = 0
         if self._data_['g'] == 0:
             pix_g = 0
         if self._data_['r'] == 0:
-            pix_b = 0
+            pix_r = 0
 
         return (pix_b, pix_g, pix_r)
