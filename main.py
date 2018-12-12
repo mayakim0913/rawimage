@@ -125,18 +125,6 @@ class MainWindow(QMainWindow):
         self.pushbutton_autodetection.clicked.connect(self.auto_detect)
 
 
-    def save_dialog(self):
-        self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
-        self.filepath = self.fname
-        pixmap = self.pix
-        obj = pixmap.toImage()
-        obj.save(self.filepath, "PNG")
-        self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
-
-
-
-
-
     def open_dialog(self):
         self.fname, _ = QFileDialog.getOpenFileName(self, 'Open file')
         self.filepath = self.fname
@@ -173,6 +161,16 @@ class MainWindow(QMainWindow):
 
 
         self.asign_format()
+
+
+
+    def save_dialog(self):
+        self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
+        self.filepath = self.fname
+        pixmap = self.pix
+        obj = pixmap.toImage()
+        obj.save(self.filepath, "PNG")
+        self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
 
 
 
@@ -289,7 +287,6 @@ class MainWindow(QMainWindow):
         self.label_img.setPixmap(self.pix)
         self.LineEdit_width.setText(str(self.imgwidth))
         self.LineEdit_height.setText(str(self.imgheight))
-
 
     def swap_format(self):
         if self.radiobutton_le.isChecked():
