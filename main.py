@@ -383,12 +383,58 @@ class MainWindow(QMainWindow):
 
 
     def auto_detect(self):
-        for i in range(4):
-            self.format = i + 1
-            pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
-            _pixmap = pa.decode_yuv()
-            self.pix = _pixmap
-            self.load_to_sub(self.pix)
+        if self.format > 0 and self.format < 19:
+            data = {'y':1, 'u':1, 'v':1}
+            for i in range(4):
+                if 0 < self.format < 5:
+                    self.format = i + 1
+                else:
+                    self.format = i + 5
+                pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
+                if self.format == 1 or self.format == 2:
+                    if not self.checkbox_y.isChecked():
+                        data['y'] = 0
+                    if not self.checkbox_u.isChecked():
+                        data['u'] = 0
+                    if not self.checkbox_v.isChecked():
+                        data['v'] = 0
+                else:
+                    if not self.checkbox_y.isChecked():
+                        data['y'] = 0
+                    if not self.checkbox_u.isChecked():
+                        data['v'] = 0
+                    if not self.checkbox_v.isChecked():
+                        data['u'] = 0
+                _pixmap = pa.decode(data)
+                self.pix = _pixmap
+                self.load_to_sub(self.pix)
+
+        elif self.format > 10 and self.format < 19:
+            data = {'r':1, 'g':1, 'b':1}
+            for i in range(4):
+                if 10 < self.format < 15:
+                    self.format = i + 11
+                else:
+                    self.format = i + 15
+                pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
+                if self.format == 11 or self.format == 12:
+                    if not self.checkbox_r.isChecked():
+                        data['r'] = 0
+                    if not self.checkbox_g.isChecked():
+                        data['g'] = 0
+                    if not self.checkbox_b.isChecked():
+                        data['b'] = 0
+                else:
+                    if not self.checkbox_r.isChecked():
+                        data['r'] = 0
+                    if not self.checkbox_g.isChecked():
+                        data['b'] = 0
+                    if not self.checkbox_b.isChecked():
+                        data['g'] = 0
+                _pixmap = pa.decode(data)
+                self.pix = _pixmap
+                self.load_to_sub(self.pix)
+
 
 
     def update_size(self):
