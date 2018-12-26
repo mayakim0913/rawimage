@@ -83,7 +83,6 @@ class LoadPicture(QWidget):
         self.pixitem=QGraphicsPixmapItem()
         self.grali=[]
 
-
     def setpicture(self,pixmap):
         self.pixitem.setPixmap(pixmap)
         self.grali.append(self.pixitem)

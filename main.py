@@ -288,6 +288,9 @@ class MainWindow(QMainWindow):
         self.LineEdit_width.setText(str(self.imgwidth))
         self.LineEdit_height.setText(str(self.imgheight))
 
+        log = LogObject(self)
+
+
     def swap_format(self):
         if self.radiobutton_le.isChecked():
             if self.checkbox_swap.isChecked() or not self.checkbox_swap.isChecked():
