@@ -65,49 +65,45 @@ class _Parser:
 
 
     def decode(self, choice):
-        try:
-            width = self._imgwidth_
-            height = self._imgheight_
-            form = self._format_
-            filepath = self._filepath_
-            self._data_.update(choice)
+        width = self._imgwidth_
+        height = self._imgheight_
+        form = self._format_
+        filepath = self._filepath_
+        self._data_.update(choice)
 
-            f_val = open(filepath, "rb")
+        f_val = open(filepath, "rb")
 
-            file = QFile(filepath)
-            self._filesize_ = file.size()  #f_size = w*h*bpp/3
+        file = QFile(filepath)
+        self._filesize_ = file.size()  #f_size = w*h*bpp/3
 
 
-            if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
-                self._bpp_ = self.getbpp('YUV422')
-                self._bufsize_ = width * height * (self._bpp_ / 8)
-                image_out = self.YUV422(width, height, form, f_val)
+        if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
+            self._bpp_ = self.getbpp('YUV422')
+            self._bufsize_ = width * height * (self._bpp_ / 8)
+            image_out = self.YUV422(width, height, form, f_val)
 
-            elif (
-                    form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
-                    or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
-            ):
-                self._bpp_ = self.getbpp('RGB3')
-                self._bufsize_ = width * height * (self._bpp_ / 8)
-                image_out = self.RGB3(width, height, form, f_val)
+        elif (
+                form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
+                or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
+        ):
+            self._bpp_ = self.getbpp('RGB3')
+            self._bufsize_ = width * height * (self._bpp_ / 8)
+            image_out = self.RGB3(width, height, form, f_val)
 
-            elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
-                self._bpp_ = self.getbpp('XR24')
-                self._bufsize_ = width * height * (self._bpp_ / 8)
-                image_out = self.XRGB(width, height, f_val)
+        elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
+            self._bpp_ = self.getbpp('XR24')
+            self._bufsize_ = width * height * (self._bpp_ / 8)
+            image_out = self.XRGB(width, height, f_val)
 
-            elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
-                self._bpp_ = self.getbpp('RGBP')
-                self._bufsize_ = width * height * (self._bpp_ / 8)
-                image_out = self.RGBP(width, height, f_val)
+        elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
+            self._bpp_ = self.getbpp('RGBP')
+            self._bufsize_ = width * height * (self._bpp_ / 8)
+            image_out = self.RGBP(width, height, f_val)
 
-            data = image_out.tobytes('raw', "RGB")
-            qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
-            pixmap = QPixmap.fromImage(qim)
-            return pixmap
-        except TypeError:
-            print("You can't read at this moments!")
-            pass
+        data = image_out.tobytes('raw', "RGB")
+        qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(qim)
+        return pixmap
         #except FileNotFoundError:
         #    pass
         #except TypeError:
@@ -205,10 +201,11 @@ class _Parser:
         return image_out
 
     def getsize(self):
-        print('Total file size(bytes):', int(self._filesize_))
-        print('Current file size(bytes):', int(self._bufsize_))
+        print('File size(bytes):', int(self._filesize_))
+        print('Want to read file size(bytes):', int(self._bufsize_))
         print('byte:', int(self._bpp_ / 8))
-        print('Current file w*h:', int(self._bufsize_ / (self._bpp_ / 8)))
+        print('File w*h:', int(self._filesize_ / (self._bpp_ / 8)))
+        print('Want to read file w*h:', int(self._bufsize_ / (self._bpp_ / 8)))
 
 
     def XRGB(self, width, height, f_rgb):
@@ -270,3 +267,28 @@ class _Parser:
             pix_r = 0
 
         return (pix_b, pix_g, pix_r)
+"""
+    def XRGB(self, width, height, f_rgb):
+        self.getsize()
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
+        
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_r = ord(f_rgb.read(1))
+                pix_g = ord(f_rgb.read(1))
+                pix_b = ord(f_rgb.read(1))
+                pix_a = ord(f_rgb.read(1))
+
+                (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+
+                pix_a = 0
+                blue = (pix_a * (pix_r / 255) + ((1 - pix_a) * (pix_r / 255))) * 255
+                green = (pix_a * (pix_g / 255) + ((1 - pix_a) * (pix_g / 255))) * 255
+                red = (pix_a * (pix_b / 255) + ((1 - pix_a) * (pix_b / 255))) * 255
+
+                pix[j, i] = int(blue), int(green), int(red)
+
+        return image_out
+
+"""
