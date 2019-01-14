@@ -212,13 +212,19 @@ class _Parser:
         self.getsize()
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
+        Total_wh = int(self._filesize_ / (self._bpp_ / 8))
+        Want_wh = int(self._bufsize_ / (self._bpp_ / 8))
 
         for i in range(0, height):
             for j in range(0, int(width)):
-                pix_r = ord(f_rgb.read(1))
-                pix_g = ord(f_rgb.read(1))
-                pix_b = ord(f_rgb.read(1))
-                pix_a = ord(f_rgb.read(1))
+                try:
+                    pix_r = ord(f_rgb.read(1))
+                    pix_g = ord(f_rgb.read(1))
+                    pix_b = ord(f_rgb.read(1))
+                    pix_a = ord(f_rgb.read(1))
+                    break
+                except Total_wh - Want_wh < 0:
+                    pass
 
                 (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
 
@@ -267,6 +273,20 @@ class _Parser:
             pix_r = 0
 
         return (pix_b, pix_g, pix_r)
+"""
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                try:
+                    pix_r = ord(f_rgb.read(1))
+                    pix_g = ord(f_rgb.read(1))
+                    pix_b = ord(f_rgb.read(1))
+                    pix_a = ord(f_rgb.read(1))
+                    break
+                except Total_wh - Want_wh < 0:
+                    pass
+
+"""
+
 """
     def XRGB(self, width, height, f_rgb):
         self.getsize()

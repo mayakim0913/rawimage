@@ -438,8 +438,7 @@ class MainWindow(QMainWindow):
                     self.pix = _pixmap
                     self.load_to_sub(self.pix)
         except TypeError:
-            pass    
-
+            pass                
 
 
     def update_size(self):
