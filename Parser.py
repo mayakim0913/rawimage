@@ -53,12 +53,6 @@ class _Parser:
         return cls.__DECODE_MAP[color][0]
 
 
-    def getsize(self):
-        print('Total file size(bytes):', int(self._filesize_))
-        print('Current file size(bytes):', int(self._bufsize_))
-        print('Current file w*h:', int(self._bufsize_ / (self._bpp_ / 8)))
-
-
     def __init__(self, _filepath, _format, _imgwidth, _imgheight):
         self._filepath_ = _filepath
         self._format_ = _format
@@ -71,47 +65,54 @@ class _Parser:
 
 
     def decode(self, choice):
-        """doc string"""
-        width = self._imgwidth_
-        height = self._imgheight_
-        form = self._format_
-        filepath = self._filepath_
-        self._data_.update(choice)
+        try:
+            width = self._imgwidth_
+            height = self._imgheight_
+            form = self._format_
+            filepath = self._filepath_
+            self._data_.update(choice)
 
-        f_val = open(filepath, "rb")
+            f_val = open(filepath, "rb")
 
-        file = QFile(filepath)
-        self._filesize_ = file.size()  #f_size = w*h*bpp/3
-
-
-        if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
-            self._bpp_ = self.getbpp('YUV422')
-            self._bufsize_ = width * height * (self._bpp_ / 8)
-            image_out = self.YUV422(width, height, form, f_val)
-
-        elif (
-                form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
-                or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
-        ):
-            self._bpp_ = self.getbpp('RGB3')
-            self._bufsize_ = width * height * (self._bpp_ / 8)
-            image_out = self.RGB3(width, height, form, f_val)
-
-        elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
-            self._bpp_ = self.getbpp('XR24')
-            self._bufsize_ = width * height * (self._bpp_ / 8)
-            image_out = self.XRGB(width, height, f_val)
-
-        elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
-            self._bpp_ = self.getbpp('RGBP')
-            self._bufsize_ = width * height * (self._bpp_ / 8)
-            image_out = self.RGBP(width, height, f_val)
+            file = QFile(filepath)
+            self._filesize_ = file.size()  #f_size = w*h*bpp/3
 
 
-        data = image_out.tobytes('raw', "RGB")
-        qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(qim)
-        return pixmap
+            if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
+                self._bpp_ = self.getbpp('YUV422')
+                self._bufsize_ = width * height * (self._bpp_ / 8)
+                image_out = self.YUV422(width, height, form, f_val)
+
+            elif (
+                    form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
+                    or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
+            ):
+                self._bpp_ = self.getbpp('RGB3')
+                self._bufsize_ = width * height * (self._bpp_ / 8)
+                image_out = self.RGB3(width, height, form, f_val)
+
+            elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
+                self._bpp_ = self.getbpp('XR24')
+                self._bufsize_ = width * height * (self._bpp_ / 8)
+                image_out = self.XRGB(width, height, f_val)
+
+            elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
+                self._bpp_ = self.getbpp('RGBP')
+                self._bufsize_ = width * height * (self._bpp_ / 8)
+                image_out = self.RGBP(width, height, f_val)
+
+            data = image_out.tobytes('raw', "RGB")
+            qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
+            pixmap = QPixmap.fromImage(qim)
+            return pixmap
+        except TypeError:
+            print("You can't read at this moments!")
+            pass
+        #except FileNotFoundError:
+        #    pass
+        #except TypeError:
+        #    pass
+
 
 
     def YUV422(self, width, height, form, f_uyvy):
@@ -203,6 +204,11 @@ class _Parser:
 
         return image_out
 
+    def getsize(self):
+        print('Total file size(bytes):', int(self._filesize_))
+        print('Current file size(bytes):', int(self._bufsize_))
+        print('byte:', int(self._bpp_ / 8))
+        print('Current file w*h:', int(self._bufsize_ / (self._bpp_ / 8)))
 
 
     def XRGB(self, width, height, f_rgb):

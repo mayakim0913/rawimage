@@ -164,13 +164,15 @@ class MainWindow(QMainWindow):
 
 
     def save_dialog(self):
-        self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
-        self.filepath = self.fname
-        pixmap = self.pix
-        obj = pixmap.toImage()
-        obj.save(self.filepath, "PNG")
-        self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
-
+        try:
+            self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
+            self.filepath = self.fname
+            pixmap = self.pix
+            obj = pixmap.toImage()
+            obj.save(self.filepath, "PNG")
+            self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
+        except AttributeError:
+            pass
 
 
     def checkbox_state(self):
@@ -233,61 +235,64 @@ class MainWindow(QMainWindow):
 
 
     def asign_format(self):
-        pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
-        self._format = self.format
+        try:
+            pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
+            self._format = self.format
 
-        if self.format > 0 and self.format < 9:
-            data = {'y':1, 'u':1, 'v':1}
-            if (
-                    self.format == YUVFormat.YUYV_LE or self.format == YUVFormat.UYVY_LE
-                    or self.format == YUVFormat.YVYU_BE or self.format == YUVFormat.VYUY_BE
-                ):
-                if not self.checkbox_y.isChecked():
-                    data['y'] = 0
-                if not self.checkbox_u.isChecked():
-                    data['u'] = 0
-                if not self.checkbox_v.isChecked():
-                    data['v'] = 0
-            elif (
-                    self.format == YUVFormat.YVYU_LE or self.format == YUVFormat.VYUY_LE
-                    or self.format == YUVFormat.YUYV_BE or self.format == YUVFormat.UYVY_BE
-                ):
-                if not self.checkbox_y.isChecked():
-                    data['y'] = 0
-                if not self.checkbox_u.isChecked():
-                    data['v'] = 0
-                if not self.checkbox_v.isChecked():
-                    data['u'] = 0
-        elif self.format > 10 and self.format < 19:
-            data = {'r':1, 'g':1, 'b':1}
-            if (
-                    self.format == RGBFormat.BGR3_LE or self.format == RGBFormat.RGB3_LE
-                    or self.format == RGBFormat.XR24_BE or self.format == RGBFormat.RGBP_BE
-                ):
-                if not self.checkbox_r.isChecked():
-                    data['b'] = 0
-                if not self.checkbox_g.isChecked():
-                    data['g'] = 0
-                if not self.checkbox_b.isChecked():
-                    data['r'] = 0
-            elif (
-                    self.format == RGBFormat.XR24_LE or self.format == RGBFormat.RGBP_LE
-                    or self.format == RGBFormat.BGR3_BE or self.format == RGBFormat.RGB3_BE
-                ):
-                if not self.checkbox_r.isChecked():
-                    data['r'] = 0
-                if not self.checkbox_g.isChecked():
-                    data['g'] = 0
-                if not self.checkbox_b.isChecked():
-                    data['b'] = 0
+            if self.format > 0 and self.format < 9:
+                data = {'y':1, 'u':1, 'v':1}
+                if (
+                        self.format == YUVFormat.YUYV_LE or self.format == YUVFormat.UYVY_LE
+                        or self.format == YUVFormat.YVYU_BE or self.format == YUVFormat.VYUY_BE
+                    ):
+                    if not self.checkbox_y.isChecked():
+                        data['y'] = 0
+                    if not self.checkbox_u.isChecked():
+                        data['u'] = 0
+                    if not self.checkbox_v.isChecked():
+                        data['v'] = 0
+                elif (
+                        self.format == YUVFormat.YVYU_LE or self.format == YUVFormat.VYUY_LE
+                        or self.format == YUVFormat.YUYV_BE or self.format == YUVFormat.UYVY_BE
+                    ):
+                    if not self.checkbox_y.isChecked():
+                        data['y'] = 0
+                    if not self.checkbox_u.isChecked():
+                        data['v'] = 0
+                    if not self.checkbox_v.isChecked():
+                        data['u'] = 0
+            elif self.format > 10 and self.format < 19:
+                data = {'r':1, 'g':1, 'b':1}
+                if (
+                        self.format == RGBFormat.BGR3_LE or self.format == RGBFormat.RGB3_LE
+                        or self.format == RGBFormat.XR24_BE or self.format == RGBFormat.RGBP_BE
+                    ):
+                    if not self.checkbox_r.isChecked():
+                        data['b'] = 0
+                    if not self.checkbox_g.isChecked():
+                        data['g'] = 0
+                    if not self.checkbox_b.isChecked():
+                        data['r'] = 0
+                elif (
+                        self.format == RGBFormat.XR24_LE or self.format == RGBFormat.RGBP_LE
+                        or self.format == RGBFormat.BGR3_BE or self.format == RGBFormat.RGB3_BE
+                    ):
+                    if not self.checkbox_r.isChecked():
+                        data['r'] = 0
+                    if not self.checkbox_g.isChecked():
+                        data['g'] = 0
+                    if not self.checkbox_b.isChecked():
+                        data['b'] = 0
 
-        _pixmap = pa.decode(data)
-        self.pix = _pixmap
-        self.label_img.setPixmap(self.pix)
-        self.LineEdit_width.setText(str(self.imgwidth))
-        self.LineEdit_height.setText(str(self.imgheight))
+            _pixmap = pa.decode(data)
+            self.pix = _pixmap
+            self.label_img.setPixmap(self.pix)
+            self.LineEdit_width.setText(str(self.imgwidth))
+            self.LineEdit_height.setText(str(self.imgheight))
 
-        log = LogObject(self)
+            log = LogObject(self)
+        except TypeError:
+            pass
 
 
     def swap_format(self):
@@ -449,25 +454,31 @@ class MainWindow(QMainWindow):
 
 
     def zoom_in(self):
-        self.factor += 0.05
-        _width = self.imgwidth
-        _height = self.imgheight
-        _width = int(self.imgwidth * self.factor)
-        _height = int(self.imgheight * self.factor)
-        self.label_img.setPixmap(self.pix.scaled(_width, _height, Qt.KeepAspectRatio))
-        self.LineEdit_width.setText(str(_width))
-        self.LineEdit_height.setText(str(_height))
+        try:
+            self.factor += 0.05
+            _width = self.imgwidth
+            _height = self.imgheight
+            _width = int(self.imgwidth * self.factor)
+            _height = int(self.imgheight * self.factor)
+            self.label_img.setPixmap(self.pix.scaled(_width, _height, Qt.KeepAspectRatio))
+            self.LineEdit_width.setText(str(_width))
+            self.LineEdit_height.setText(str(_height))
+        except AttributeError:
+            pass
 
 
     def zoom_out(self):
-        self.factor -= 0.05
-        _width = self.imgwidth
-        _height = self.imgheight
-        _width = int(self.imgwidth * self.factor)
-        _height = int(self.imgheight * self.factor)
-        self.label_img.setPixmap(self.pix.scaled(_width, _height, Qt.KeepAspectRatio))
-        self.LineEdit_width.setText(str(_width))
-        self.LineEdit_height.setText(str(_height))
+        try:
+            self.factor -= 0.05
+            _width = self.imgwidth
+            _height = self.imgheight
+            _width = int(self.imgwidth * self.factor)
+            _height = int(self.imgheight * self.factor)
+            self.label_img.setPixmap(self.pix.scaled(_width, _height, Qt.KeepAspectRatio))
+            self.LineEdit_width.setText(str(_width))
+            self.LineEdit_height.setText(str(_height))
+        except AttributeError:
+            pass
 
 
 
