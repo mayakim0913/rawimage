@@ -122,7 +122,8 @@ class MainWindow(QMainWindow):
         self.LineEdit_height.textEdited.connect(self.update_size2)
         self.apply_button.clicked.connect(self.asign_format)
 
-        self.pushbutton_autodetection.clicked.connect(self.auto_detect)
+        self.auto_btn.clicked.connect(self.auto_detect)
+        self.hex_btn.clicked.connect(self.hex_detect)
 
 
     def open_dialog(self):
@@ -438,7 +439,45 @@ class MainWindow(QMainWindow):
                     self.pix = _pixmap
                     self.load_to_sub(self.pix)
         except TypeError:
-            pass                
+            pass
+
+
+    def hex_detect(self):
+        src = open(self.filepath, "rb").read()
+        length = 16
+        sep = ''
+        result = []
+        try:
+            xrange(0,1)
+        except NameError:
+            xrange = range
+        for i in xrange(0, len(src), length):
+            subSrc = src[i:i+length]
+            hexa = ''
+            isMiddle = False;
+            for h in xrange(0,len(subSrc)):
+                if h == length/2:
+                    hexa += ' '
+                h = subSrc[h]
+                if not isinstance(h, int):
+                    h = ord(h)
+                h = hex(h).replace('0x','')
+                if len(h) == 1:
+                    h = '0'+h
+                hexa += h+' '
+            hexa = hexa.strip(' ')
+            text = ''
+            for c in subSrc:
+                if not isinstance(c, int):
+                    c = ord(c)
+                if 0x20 <= c < 0x7F:
+                    text += chr(c)
+                else:
+                    text += sep
+            result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text))
+        hex_src = '\n'.join(result)
+        #print (hex_src)
+        self.label_2.setText(hex_src)
 
 
     def update_size(self):
