@@ -9,25 +9,33 @@ Form implementation generated from reading ui file 'widget.ui'
 python: 3.6
 
 """
+#modulization: MVC
+#1 file 1 class!!
+#variable name: same way to either upper or _
+
+#M: parsing
+#v(designer): only UI part, icon, button
+#c(developer): eventwatcher / clicked event 
+
+#1. SYSTEM
+from enum import Enum, IntEnum
 import sys
 import os
 
-from enum import Enum, IntEnum
+#2. THIRD
 from PyQt5 import (Qt, QtCore, QtGui, QtWidgets, uic)
 from PyQt5.uic import loadUi
-
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-
 from PIL import Image
 from timeit import default_timer as timer
 
-
+#3. private
 from LoadPicture import *
 import Parser
 
-
+#Can change other way
 THINGS = os.path.dirname(os.path.abspath(__file__))
 L = lambda f: os.path.join(THINGS, f)
 
@@ -55,7 +63,7 @@ class RGBFormat(IntEnum):
     XR24_BE = 17
     RGBP_BE = 18
 
-
+#Main Window only about V!!
 class MainWindow(QMainWindow):
     count = 0
     def __init__(self):
@@ -72,7 +80,7 @@ class MainWindow(QMainWindow):
         self.factor = 1.0
         self.pix = None
 
-
+#DELETE TO DESIGNER
     def action_icon(self):
         icon_open = QIcon()
         icon_save = QIcon()
@@ -98,7 +106,7 @@ class MainWindow(QMainWindow):
         self.actionAbout.setIcon(icon_about)
         self.actionExit.setIcon(icon_exit)
 
-
+#TO P part!
     def connect_action(self):
         self.actionOpen.triggered.connect(self.open_dialog)
         self.actionSave_As.triggered.connect(self.save_dialog)
@@ -448,7 +456,8 @@ class MainWindow(QMainWindow):
         except TypeError:
             pass
 
-
+#Need to check the performance of each part
+#then, should change! for improve performance(within 5 seconds!!....)
     def hex_detect(self):
         src = open(self.filepath, "rb").read()
         length = 16
@@ -532,21 +541,3 @@ if __name__ == '__main__':
     WINDOW.setWindowTitle('Raw Image viewer')
     WINDOW.show()
     sys.exit(APP.exec_())
-
-"""
-        while True:
-            try:
-                self.factor += 0.05
-                _width = self.imgwidth
-                _height = self.imgheight
-                _width = int(self.imgwidth * self.factor)
-                _height = int(self.imgheight * self.factor)
-                self.label_img.setPixmap(self.pix.scaled(_width, _height, Qt.KeepAspectRatio))
-                self.LineEdit_width.setText(str(_width))
-                self.LineEdit_height.setText(str(_height))
-                break
-            except AttributeError:
-                ans = QMessageBox.Warning(self, "error", "You should open the file first.") #QMessageBox.Yes)
-                if ans == QMessageBox.Yes:
-                    pass
-"""

@@ -6,15 +6,18 @@
 import sys
 from enum import Enum, IntEnum
 import array
+import inspect
+
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QFile
+
+
 from main import *
 from LoadPicture import *
 from PIL import Image
-import inspect
 
 
-
+#Ian's zero pending...bb
 class YUVFormat(IntEnum):
     YUYV_LE = 1
     UYVY_LE = 2
@@ -52,9 +55,11 @@ class _Parser:
     def getbpp(cls, color):
         return cls.__DECODE_MAP[color][0]
 
-
+#variable name
+#_variablename means protected things
+#So, if i want to use that, __variable /or/ another name
     def __init__(self, _filepath, _format, _imgwidth, _imgheight):
-        self._filepath_ = _filepath
+        self._filepath_ = _filepath #__를 앞
         self._format_ = _format
         self._imgwidth_ = _imgwidth
         self._imgheight_ = _imgheight
@@ -63,7 +68,14 @@ class _Parser:
         self._bufsize_ = None
         self._bpp_ = None
 
+    def getsize(self):
+        print('File size(bytes):', int(self._filesize_))
+        print('Want to read file size(bytes):', int(self._bufsize_))
+        print('byte:', int(self._bpp_ / 8))
+        print('File w*h:', int(self._filesize_ / (self._bpp_ / 8)))
+        print('Want to read file w*h:', int(self._bufsize_ / (self._bpp_ / 8)))
 
+#using Dictonary
     def decode(self, choice):
         try:
             width = self._imgwidth_
@@ -107,9 +119,6 @@ class _Parser:
             return pixmap
         except FileNotFoundError:
             pass
-        #except TypeError:
-        #    pass
-
 
 
     def YUV422(self, width, height, form, f_uyvy):
@@ -119,26 +128,31 @@ class _Parser:
 
         for i in range(0, height):
             for j in range(0, int(width/2)):
+                pix_y1 = pix_u = pix_y2 = pix_v = 0
+
                 if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
-                    pix_y1 = ord(f_uyvy.read(1))
-                    pix_u = ord(f_uyvy.read(1))
-                    pix_y2 = ord(f_uyvy.read(1))
-                    pix_v = ord(f_uyvy.read(1))
+                    try:
+                        pix_y1, pix_u, pix_y2, pix_v = (b for b in f_uyvy.read(4))
+                    except:
+                        pass
+
                 elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
-                    pix_u = ord(f_uyvy.read(1))
-                    pix_y1 = ord(f_uyvy.read(1))
-                    pix_v = ord(f_uyvy.read(1))
-                    pix_y2 = ord(f_uyvy.read(1))
+                    try:
+                        pix_u, pix_y1, pix_v, pix_y2 = (b for b in f_uyvy.read(4))
+                    except:
+                        pass
+
                 elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
-                    pix_y1 = ord(f_uyvy.read(1))
-                    pix_v = ord(f_uyvy.read(1))
-                    pix_y2 = ord(f_uyvy.read(1))
-                    pix_u = ord(f_uyvy.read(1))
+                    try:
+                        pix_y1, pix_v, pix_y2, pix_u = (b for b in f_uyvy.read(4))
+                    except:
+                        pass
+
                 elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
-                    pix_v = ord(f_uyvy.read(1))
-                    pix_y1 = ord(f_uyvy.read(1))
-                    pix_u = ord(f_uyvy.read(1))
-                    pix_y2 = ord(f_uyvy.read(1))
+                    try:
+                        pix_v, pix_y1, pix_u, pix_y2 = (b for b in f_uyvy.read(4))
+                    except:
+                        pass
 
                 (
                     pix_y1, pix_y2, pix_u, pix_v
@@ -180,15 +194,18 @@ class _Parser:
 
         for i in range(0, height):
             for j in range(0, int(width)):
+                pix_r = pix_g = pix_b = 0
                 if form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE:
-                    pix_r = ord(f_rgb.read(1))
-                    pix_g = ord(f_rgb.read(1))
-                    pix_b = ord(f_rgb.read(1))
+                    try:
+                        pix_r, pix_g, pix_b = (b for b in f_rgb.read(3))
+                    except:
+                        pass
 
                 elif form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE:
-                    pix_b = ord(f_rgb.read(1))
-                    pix_g = ord(f_rgb.read(1))
-                    pix_r = ord(f_rgb.read(1))
+                    try:
+                        pix_b, pix_g, pix_r = (b for b in f_rgb.read(3))
+                    except:
+                        pass
 
 
                 (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
@@ -201,13 +218,6 @@ class _Parser:
 
         return image_out
 
-    def getsize(self):
-        print('File size(bytes):', int(self._filesize_))
-        print('Want to read file size(bytes):', int(self._bufsize_))
-        print('byte:', int(self._bpp_ / 8))
-        print('File w*h:', int(self._filesize_ / (self._bpp_ / 8)))
-        print('Want to read file w*h:', int(self._bufsize_ / (self._bpp_ / 8)))
-
 
     def XRGB(self, width, height, f_rgb):
         self.getsize()
@@ -218,13 +228,10 @@ class _Parser:
 
         for i in range(0, height):
             for j in range(0, int(width)):
+                pix_r = pix_g = pix_b = pix_a = 0
                 try:
-                    pix_r = ord(f_rgb.read(1))
-                    pix_g = ord(f_rgb.read(1))
-                    pix_b = ord(f_rgb.read(1))
-                    pix_a = ord(f_rgb.read(1))
-                    break
-                except Total_wh - Want_wh < 0:
+                    pix_r, pix_g, pix_b, pix_a = (b for b in f_rgb.read(4))
+                except:
                     pass
 
                 (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
@@ -247,8 +254,11 @@ class _Parser:
 
         for i in range(0, height):
             for j in range(0, int(width)):
-                pix_h = ord(f_rgb.read(1))
-                pix_l = ord(f_rgb.read(1))
+                pix_h = pix_l = 0
+                try:
+                    pix_h, pix_l = (b for b in f_rgb.read(2))
+                except:
+                    pass
 
                 value = pix_l*256 + pix_h
 
@@ -274,42 +284,30 @@ class _Parser:
             pix_r = 0
 
         return (pix_b, pix_g, pix_r)
+
+
+
 """
         for i in range(0, height):
-            for j in range(0, int(width)):
-                try:
-                    pix_r = ord(f_rgb.read(1))
-                    pix_g = ord(f_rgb.read(1))
-                    pix_b = ord(f_rgb.read(1))
-                    pix_a = ord(f_rgb.read(1))
-                    break
-                except Total_wh - Want_wh < 0:
-                    pass
-
-"""
-
-"""
-    def XRGB(self, width, height, f_rgb):
-        self.getsize()
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
-
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = ord(f_rgb.read(1))
-                pix_g = ord(f_rgb.read(1))
-                pix_b = ord(f_rgb.read(1))
-                pix_a = ord(f_rgb.read(1))
-
-                (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
-
-                pix_a = 0
-                blue = (pix_a * (pix_r / 255) + ((1 - pix_a) * (pix_r / 255))) * 255
-                green = (pix_a * (pix_g / 255) + ((1 - pix_a) * (pix_g / 255))) * 255
-                red = (pix_a * (pix_b / 255) + ((1 - pix_a) * (pix_b / 255))) * 255
-
-                pix[j, i] = int(blue), int(green), int(red)
-
-        return image_out
-
+            for j in range(0, int(width/2)):
+                if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
+                    pix_y1 = ord(f_uyvy.read(1))
+                    pix_u = ord(f_uyvy.read(1))
+                    pix_y2 = ord(f_uyvy.read(1))
+                    pix_v = ord(f_uyvy.read(1))
+                elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
+                    pix_u = ord(f_uyvy.read(1))
+                    pix_y1 = ord(f_uyvy.read(1))
+                    pix_v = ord(f_uyvy.read(1))
+                    pix_y2 = ord(f_uyvy.read(1))
+                elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
+                    pix_y1 = ord(f_uyvy.read(1))
+                    pix_v = ord(f_uyvy.read(1))
+                    pix_y2 = ord(f_uyvy.read(1))
+                    pix_u = ord(f_uyvy.read(1))
+                elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
+                    pix_v = ord(f_uyvy.read(1))
+                    pix_y1 = ord(f_uyvy.read(1))
+                    pix_u = ord(f_uyvy.read(1))
+                    pix_y2 = ord(f_uyvy.read(1))
 """
