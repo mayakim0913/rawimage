@@ -129,7 +129,6 @@ class MainWindow(QMainWindow):
     def open_dialog(self):
         self.fname, _ = QFileDialog.getOpenFileName(self, 'Open file')
         self.filepath = self.fname
-        self.statusbar.showMessage("Successfully Loaded: {}".format(self.fname))
         self.radiobutton_le.setChecked(True)
 
 
@@ -289,6 +288,7 @@ class MainWindow(QMainWindow):
         self.LineEdit_height.setText(str(self.imgheight))
 
         log = LogObject(self)
+        self.statusbar.showMessage("Successfully Loaded: {}".format(self.filepath))
 
 
     def swap_format(self):

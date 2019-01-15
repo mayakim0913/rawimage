@@ -65,7 +65,8 @@ class _Parser:
 
 
     def decode(self, choice):
-        width = self._imgwidth_
+        try:
+            width = self._imgwidth_
         height = self._imgheight_
         form = self._format_
         filepath = self._filepath_
@@ -292,7 +293,7 @@ class _Parser:
         self.getsize()
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
-        
+
         for i in range(0, height):
             for j in range(0, int(width)):
                 pix_r = ord(f_rgb.read(1))
