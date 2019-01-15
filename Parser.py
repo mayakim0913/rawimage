@@ -67,46 +67,46 @@ class _Parser:
     def decode(self, choice):
         try:
             width = self._imgwidth_
-        height = self._imgheight_
-        form = self._format_
-        filepath = self._filepath_
-        self._data_.update(choice)
+            height = self._imgheight_
+            form = self._format_
+            filepath = self._filepath_
+            self._data_.update(choice)
 
-        f_val = open(filepath, "rb")
+            f_val = open(filepath, "rb")
 
-        file = QFile(filepath)
-        self._filesize_ = file.size()  #f_size = w*h*bpp/3
+            file = QFile(filepath)
+            self._filesize_ = file.size()  #f_size = w*h*bpp/3
 
 
-        if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
-            self._bpp_ = self.getbpp('YUV422')
-            self._bufsize_ = width * height * (self._bpp_ / 8)
-            image_out = self.YUV422(width, height, form, f_val)
+            if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
+                self._bpp_ = self.getbpp('YUV422')
+                self._bufsize_ = width * height * (self._bpp_ / 8)
+                image_out = self.YUV422(width, height, form, f_val)
 
-        elif (
-                form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
-                or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
-        ):
-            self._bpp_ = self.getbpp('RGB3')
-            self._bufsize_ = width * height * (self._bpp_ / 8)
-            image_out = self.RGB3(width, height, form, f_val)
+            elif (
+                    form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
+                    or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
+            ):
+                self._bpp_ = self.getbpp('RGB3')
+                self._bufsize_ = width * height * (self._bpp_ / 8)
+                image_out = self.RGB3(width, height, form, f_val)
 
-        elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
-            self._bpp_ = self.getbpp('XR24')
-            self._bufsize_ = width * height * (self._bpp_ / 8)
-            image_out = self.XRGB(width, height, f_val)
+            elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
+                self._bpp_ = self.getbpp('XR24')
+                self._bufsize_ = width * height * (self._bpp_ / 8)
+                image_out = self.XRGB(width, height, f_val)
 
-        elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
-            self._bpp_ = self.getbpp('RGBP')
-            self._bufsize_ = width * height * (self._bpp_ / 8)
-            image_out = self.RGBP(width, height, f_val)
+            elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
+                self._bpp_ = self.getbpp('RGBP')
+                self._bufsize_ = width * height * (self._bpp_ / 8)
+                image_out = self.RGBP(width, height, f_val)
 
-        data = image_out.tobytes('raw', "RGB")
-        qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(qim)
-        return pixmap
-        #except FileNotFoundError:
-        #    pass
+            data = image_out.tobytes('raw', "RGB")
+            qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
+            pixmap = QPixmap.fromImage(qim)
+            return pixmap
+        except FileNotFoundError:
+            pass
         #except TypeError:
         #    pass
 

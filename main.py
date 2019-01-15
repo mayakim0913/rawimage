@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from PIL import Image
+from timeit import default_timer as timer
 
 
 from LoadPicture import *
@@ -233,6 +234,7 @@ class MainWindow(QMainWindow):
 
 
     def asign_format(self):
+        start = timer()
         pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
         self._format = self.format
 
@@ -281,15 +283,20 @@ class MainWindow(QMainWindow):
                 if not self.checkbox_b.isChecked():
                     data['b'] = 0
 
-        _pixmap = pa.decode(data)
-        self.pix = _pixmap
-        self.label_img.setPixmap(self.pix)
-        self.LineEdit_width.setText(str(self.imgwidth))
-        self.LineEdit_height.setText(str(self.imgheight))
+        try:
+            _pixmap = pa.decode(data)
+            self.pix = _pixmap
+            self.label_img.setPixmap(self.pix)
+            self.LineEdit_width.setText(str(self.imgwidth))
+            self.LineEdit_height.setText(str(self.imgheight))
+            log = LogObject(self)
+            end = timer()
 
-        log = LogObject(self)
-        self.statusbar.showMessage("Successfully Loaded: {}".format(self.filepath))
+            print('Time consumption:', end - start)
+            self.statusbar.showMessage("Successfully Loaded: {}".format(self.filepath))
 
+        except TypeError:
+            pass
 
     def swap_format(self):
         if self.radiobutton_le.isChecked():
