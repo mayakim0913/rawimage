@@ -15,6 +15,8 @@ from PyQt5.QtCore import QFile
 from main import *
 from LoadPicture import *
 from PIL import Image
+import cv2
+import numpy as np
 
 
 #Ian's zero pending...bb
@@ -225,6 +227,12 @@ class _Parser:
         pix = image_out.load()
         Total_wh = int(self._filesize_ / (self._bpp_ / 8))
         Want_wh = int(self._bufsize_ / (self._bpp_ / 8))
+        loo = False
+
+        f_rgb = np.array(f_rgb)
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            loo = True
 
         for i in range(0, height):
             for j in range(0, int(width)):
@@ -234,23 +242,29 @@ class _Parser:
                 except:
                     pass
 
-                (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+                if loo == True:
+                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+                    print("hi")
 
-                pix_a = 0
-                blue = (pix_a * (pix_r / 255) + ((1 - pix_a) * (pix_r / 255))) * 255
-                green = (pix_a * (pix_g / 255) + ((1 - pix_a) * (pix_g / 255))) * 255
-                red = (pix_a * (pix_b / 255) + ((1 - pix_a) * (pix_b / 255))) * 255
-
-                pix[j, i] = int(blue), int(green), int(red)
+                pix[j, i] = pix_r, pix_g, pix_b
 
         return image_out
 
+    def choice_rgbval(self, pix_b, pix_g, pix_r):
+        if self._data_['b'] == 0:
+            pix_b = 0
+        if self._data_['g'] == 0:
+            pix_g = 0
+        if self._data_['r'] == 0:
+            pix_r = 0
 
+        return (pix_b, pix_g, pix_r)
 
     def RGBP(self, width, height, f_rgb):
         self.getsize()
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
+
 
         for i in range(0, height):
             for j in range(0, int(width)):
@@ -275,15 +289,7 @@ class _Parser:
 
 
 
-    def choice_rgbval(self, pix_b, pix_g, pix_r):
-        if self._data_['b'] == 0:
-            pix_b = 0
-        if self._data_['g'] == 0:
-            pix_g = 0
-        if self._data_['r'] == 0:
-            pix_r = 0
 
-        return (pix_b, pix_g, pix_r)
 
 
 
@@ -310,4 +316,11 @@ class _Parser:
                     pix_y1 = ord(f_uyvy.read(1))
                     pix_u = ord(f_uyvy.read(1))
                     pix_y2 = ord(f_uyvy.read(1))
+"""
+"""
+            f_val = open(filepath, "rb")
+
+            file = QFile(filepath)
+            self._filesize_ = file.size()  #f_size = w*h*bpp/3
+
 """

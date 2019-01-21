@@ -9,6 +9,7 @@ Form implementation generated from reading ui file 'widget.ui'
 python: 3.6
 
 """
+
 #modulization: MVC
 #1 file 1 class!!
 #variable name: same way to either upper or _
