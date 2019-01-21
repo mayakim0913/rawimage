@@ -9,13 +9,15 @@ Form implementation generated from reading ui file 'widget.ui'
 python: 3.6
 
 """
+
+#maaya
 #modulization: MVC
 #1 file 1 class!!
 #variable name: same way to either upper or _
 
 #M: parsing
 #v(designer): only UI part, icon, button
-#c(developer): eventwatcher / clicked event 
+#c(developer): eventwatcher / clicked event
 
 #1. SYSTEM
 from enum import Enum, IntEnum
