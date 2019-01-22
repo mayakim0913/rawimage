@@ -130,10 +130,16 @@ class _Parser:
 
     def YUV422(self, width, height, form, f_uyvy):
         self.getsize()
+        sel = 0
+        #im = f_uyvy.read()
+        #im = array.array('B')
+        #im.frombytes(f_uyvy.read())
 
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
 
+        if self._data_ != {'y':1, 'u':1, 'v':1}:
+            sel = 1
 
         for i in range(0, height):
             for j in range(0, int(width/2)):
@@ -142,12 +148,21 @@ class _Parser:
                 if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
                     try:
                         pix_y1, pix_u, pix_y2, pix_v = (b for b in f_uyvy.read(4))
+                        #pix_y1 = im[(width*i+j)*4]
+                        #pix_u = im[(width*i+j)*4+1]
+                        #pix_y2 = im[(width*i+j)*4+2]
+                        #pix_v = im[(width*i+j)*4+3]
+
                     except:
                         pass
 
                 elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
                     try:
                         pix_u, pix_y1, pix_v, pix_y2 = (b for b in f_uyvy.read(4))
+                        #pix_u = im[(width*i+j)*4]
+                        #pix_y1 = im[(width*i+j)*4+1]
+                        #pix_v = im[(width*i+j)*4+2]
+                        #pix_y2 = im[(width*i+j)*4+3]
                     except:
                         pass
 
@@ -163,11 +178,8 @@ class _Parser:
                     except:
                         pass
 
-                (
-                    pix_y1, pix_y2, pix_u, pix_v
-                ) = self.choice_yuvval(
-                    pix_y1, pix_y2, pix_u, pix_v
-                )
+                if sel == 1:
+                    (pix_y1, pix_y2, pix_u, pix_v) = self.choice_yuvval(pix_y1, pix_y2, pix_u, pix_v)
 
 
                 red = 1.164 * (pix_y1-16) + 2.018 * (pix_u - 128)
@@ -199,6 +211,9 @@ class _Parser:
     def RGB3(self, width, height, form, f_rgb):
         self.getsize()
         sel = 0
+
+        #im = f_rgb.read()
+
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
 
@@ -211,12 +226,18 @@ class _Parser:
                 if form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE:
                     try:
                         pix_r, pix_g, pix_b = (b for b in f_rgb.read(3))
+                        #pix_r = im[(width*i+j)*4]
+                        #pix_g = im[(width*i+j)*4+1]
+                        #pix_b = im[(width*i+j)*4+2]
                     except:
                         pass
 
                 elif form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE:
                     try:
                         pix_b, pix_g, pix_r = (b for b in f_rgb.read(3))
+                        #pix_b = im[(width*i+j)*4]
+                        #pix_g = im[(width*i+j)*4+1]
+                        #pix_r = im[(width*i+j)*4+2]
                     except:
                         pass
 
@@ -231,11 +252,16 @@ class _Parser:
     def XRGB(self, width, height, f_rgb):
         self.getsize()
         sel = 0
+
+        im = np.fromfile(f_rgb, dtype=np.uint8) #reshape((width, height, int(self._bpp_ / 8)))
+        #a = np.zeros([width, height, 4], dtype=np.uint8)
+
+        #im = a.fromstring(b)
         ##1. array
         #im = array.array('B')
         #im.frombytes(f_rgb.read())
-        ##2. numpy
-        im = f_rgb.read()
+        ##2. read
+        #im = f_rgb.read()
 
         image_out = Image.new("RGB", (width, height), (0,0,0))
         #image_out = np.zeros((width, height, 4), dtype=np.uint8)
@@ -269,9 +295,11 @@ class _Parser:
     def RGBP(self, width, height, f_rgb):
         self.getsize()
         sel = 0
+
         #im = array.array('B')
         #im.frombytes(f_rgb.read())
         im = f_rgb.read()
+
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
 

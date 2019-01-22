@@ -353,7 +353,7 @@
            </layout>
           </widget>
          </widget>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
             <widget class="QPushButton" name="auto_btn">
@@ -444,6 +444,11 @@
             </item>
            </layout>
           </widget>
+         </widget>
+         <widget class="QProgressBar" name="pg">
+          <property name="value">
+           <number>0</number>
+          </property>
          </widget>
         </widget>
        </item>

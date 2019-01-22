@@ -10,10 +10,6 @@ python: 3.6
 
 """
 
-#<<<<<<< HEAD
-#maaya
-#=======
-#>>>>>>> eddcc29e3b9fdaf29cecd37ac5f051a62487b8ac
 #modulization: MVC
 #1 file 1 class!!
 #variable name: same way to either upper or _
@@ -26,6 +22,7 @@ python: 3.6
 from enum import Enum, IntEnum
 import sys
 import os
+import time
 
 #2. THIRD
 from PyQt5 import (Qt, QtCore, QtGui, QtWidgets, uic)
@@ -68,6 +65,15 @@ class RGBFormat(IntEnum):
     XR24_BE = 17
     RGBP_BE = 18
 
+class TaskThread(QtCore.QThread):
+    #taskFinished = QtCore.pyqtSignal(int)
+    taskFinished = QtCore.pyqtSignal()
+    def run(self):
+        #for i in range(101):
+            #self.taskFinished.emit(i)
+            #time.sleep(0.1)
+        self.taskFinished.emit()
+
 #Main Window only about V!!
 class MainWindow(QMainWindow):
     count = 0
@@ -84,6 +90,10 @@ class MainWindow(QMainWindow):
         self.imgheight = 400
         self.factor = 1.0
         self.pix = None
+
+        self.myLongTask = TaskThread()
+        #self.myLongTask.taskFinished.connect(self.onFinished)
+        self.myLongTask.taskFinished.connect(self.onFinished)
 
 #DELETE TO DESIGNER
     def action_icon(self):
@@ -176,7 +186,6 @@ class MainWindow(QMainWindow):
         self.asign_format()
 
 
-
     def save_dialog(self):
         self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
         self.filepath = self.fname
@@ -245,8 +254,17 @@ class MainWindow(QMainWindow):
         self.checkbox_state()
         self.match_format()
 
+    def onStart(self):
+        self.pg.setRange(0,0)
+        self.myLongTask.start()
+
+    def onFinished(self):
+        self.pg.setRange(0,1)
+        self.pg.setValue(1)
+
 
     def asign_format(self):
+        self.onStart()
         start = timer()
         pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
         self._format = self.format
