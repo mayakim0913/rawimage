@@ -3,6 +3,8 @@
 #pylint:disble = missing-docstring
 #pylint:disable = no-name-in-module
 
+#pip install numexpr==2.6.1
+
 import sys
 from enum import Enum, IntEnum
 import array
@@ -17,6 +19,7 @@ from LoadPicture import *
 from PIL import Image
 import cv2
 import numpy as np
+import numexpr as ne
 import array
 
 #Ian's zero pending...bb
@@ -127,8 +130,10 @@ class _Parser:
 
     def YUV422(self, width, height, form, f_uyvy):
         self.getsize()
+
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
+
 
         for i in range(0, height):
             for j in range(0, int(width/2)):
@@ -193,8 +198,12 @@ class _Parser:
 
     def RGB3(self, width, height, form, f_rgb):
         self.getsize()
+        sel = 0
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            sel = 1
 
         for i in range(0, height):
             for j in range(0, int(width)):
@@ -211,28 +220,116 @@ class _Parser:
                     except:
                         pass
 
+                if sel == 1:
+                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
 
-                (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
-
-                red = pix_r
-                green = pix_g
-                blue = pix_b
-
-                pix[j, i] = int(blue), int(green), int(red)
+                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
 
 
     def XRGB(self, width, height, f_rgb):
         self.getsize()
+        sel = 0
+        ##1. array
+        #im = array.array('B')
+        #im.frombytes(f_rgb.read())
+        ##2. numpy
+        im = f_rgb.read()
+
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        #image_out = np.zeros((width, height, 4), dtype=np.uint8)
+        pix = image_out.load()
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            sel = 1
+
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_r = pix_g = pix_b = pix_a = 0
+                try:
+                    #pix_r, pix_g, pix_b, pix_a = (b for b in f_rgb.read(4))
+                    pix_r = im[(width*i+j)*4]
+                    pix_g = im[(width*i+j)*4+1]
+                    pix_b = im[(width*i+j)*4+2]
+
+                except:
+                    pass
+
+                if sel == 1:
+                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+
+                pix[j, i] = pix_r, pix_g, pix_b
+
+        return image_out
+
+
+
+
+    def RGBP(self, width, height, f_rgb):
+        self.getsize()
+        sel = 0
+        #im = array.array('B')
+        #im.frombytes(f_rgb.read())
+        im = f_rgb.read()
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
+
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            sel = 1
+
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_h = pix_l = 0
+                try:
+                    #pix_h, pix_l = (b for b in f_rgb.read(2))
+                    pix_h = im[(width*i+j)*4]
+                    pix_l = im[(width*i+j)*4+1]
+                except:
+                    pass
+
+                value = pix_l*256 + pix_h
+
+                blue = (value & 0xF800) >> 8
+                green = (value & 0x7E0) >> 3
+                red = (value & 0x1F) << 3
+
+                if sel == 1:
+                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+
+                pix[j, i] = int(red), int(green), int(blue)
+
+
+        return image_out
+
+
+    def choice_rgbval(self, pix_b, pix_g, pix_r):
+        if self._data_['b'] == 0:
+            pix_b = 0
+        if self._data_['g'] == 0:
+            pix_g = 0
+        if self._data_['r'] == 0:
+            pix_r = 0
+
+        return (pix_b, pix_g, pix_r)
+
+"""
+    def XRGB(self, width, height, f_rgb):
+        self.getsize()
         #sel = 0
         #im = cv2.imread(self._filepath_)
 
         ##1. array
-        im = array.array('B')
-        im.frombytes(f_rgb.read())
-        ##2. nump
-        #im = f_rgb.read()
+        #im = array.array('B')
+        #im.frombytes(f_rgb.read())
+        ##2. numpy
+        im = f_rgb.read()
+
+        #im = np.zeros([width, height, 4], dtype=np.uint8)
+        #im = np.fromstring(f_rgb.tobytes(),np.uint8)
+
+        #im.asarray(img, dtype="int32")
 
         #im = np.asarray(f_rgb, dtype="int32" )
 
@@ -277,43 +374,7 @@ class _Parser:
 
         #f_rgb = np.array(f_rgb)
 
-
-    def choice_rgbval(self, pix_b, pix_g, pix_r):
-        if self._data_['b'] == 0:
-            pix_b = 0
-        if self._data_['g'] == 0:
-            pix_g = 0
-        if self._data_['r'] == 0:
-            pix_r = 0
-
-        return (pix_b, pix_g, pix_r)
-
-    def RGBP(self, width, height, f_rgb):
-        self.getsize()
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
-
-
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_h = pix_l = 0
-                try:
-                    pix_h, pix_l = (b for b in f_rgb.read(2))
-                except:
-                    pass
-
-                value = pix_l*256 + pix_h
-
-                blue = (value & 0xF800) >> 8
-                green = (value & 0x7E0) >> 3
-                red = (value & 0x1F) << 3
-
-                (blue, green, red) = self.choice_rgbval(blue, green, red)
-
-                pix[j, i] = int(red), int(green), int(blue)
-
-
-        return image_out
+"""
 """
 
         im = array.array('B')

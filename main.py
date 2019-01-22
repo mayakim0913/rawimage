@@ -503,7 +503,10 @@ class MainWindow(QMainWindow):
 
     def update_size(self):
         if self.LineEdit_width.text():
-            self.imgwidth = int(self.LineEdit_width.text())
+            try:
+                self.imgwidth = int(self.LineEdit_width.text())
+            except ValueError:
+                pass
 
     def update_size2(self):
         if self.LineEdit_height.text():
