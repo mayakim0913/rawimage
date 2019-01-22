@@ -92,7 +92,6 @@ class MainWindow(QMainWindow):
         self.pix = None
 
         self.myLongTask = TaskThread()
-        #self.myLongTask.taskFinished.connect(self.onFinished)
         self.myLongTask.taskFinished.connect(self.onFinished)
 
 #DELETE TO DESIGNER
