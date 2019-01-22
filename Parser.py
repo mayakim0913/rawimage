@@ -15,7 +15,9 @@ from PyQt5.QtCore import QFile
 from main import *
 from LoadPicture import *
 from PIL import Image
-
+import cv2
+import numpy as np
+import array
 
 #Ian's zero pending...bb
 class YUVFormat(IntEnum):
@@ -85,6 +87,8 @@ class _Parser:
             self._data_.update(choice)
 
             f_val = open(filepath, "rb")
+
+            #will open the file for read mode (r) with binary I/O (b).
 
             file = QFile(filepath)
             self._filesize_ = file.size()  #f_size = w*h*bpp/3
@@ -221,36 +225,74 @@ class _Parser:
 
     def XRGB(self, width, height, f_rgb):
         self.getsize()
+        #sel = 0
+        #im = cv2.imread(self._filepath_)
+
+        ##1. array
+        im = array.array('B')
+        im.frombytes(f_rgb.read())
+        ##2. nump
+        #im = f_rgb.read()
+
+        #im = np.asarray(f_rgb, dtype="int32" )
+
+        #img = np.array(f_rgb)
+        #im = np.asarray(img, dtype="int32")
+        #array = np.zeros([width, height, 4], dtype=np.uint8)
+        #array[:,:100] = [255, 128, 0, 255] #Orange left side
+        #array[:,100:] = [0, 0, 255, 255] #Blue right side
+
+        #im = np.fromstring(f_rgb.tobytes(),np.uint8)
+        #im = im.reshape((f_rgb.size[1], f_rgb.size[0], 4))
+
         image_out = Image.new("RGB", (width, height), (0,0,0))
+        #image_out = np.zeros((width, height, 4), dtype=np.uint8)
         pix = image_out.load()
-        Total_wh = int(self._filesize_ / (self._bpp_ / 8))
-        Want_wh = int(self._bufsize_ / (self._bpp_ / 8))
+
+
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            sel = 1
 
         for i in range(0, height):
             for j in range(0, int(width)):
                 pix_r = pix_g = pix_b = pix_a = 0
                 try:
-                    pix_r, pix_g, pix_b, pix_a = (b for b in f_rgb.read(4))
+                    #pix_r, pix_g, pix_b, pix_a = (b for b in f_rgb.read(4))
+                    pix_r = im[(width*i+j)*4]
+                    pix_g = im[(width*i+j)*4+1]
+                    pix_b = im[(width*i+j)*4+2]
+                    #print (pix_r)
+                    #print (pix_g)
+                    #print (pix_b)
                 except:
                     pass
 
-                (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+                #if sel == 1:
+                #    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
 
-                pix_a = 0
-                blue = (pix_a * (pix_r / 255) + ((1 - pix_a) * (pix_r / 255))) * 255
-                green = (pix_a * (pix_g / 255) + ((1 - pix_a) * (pix_g / 255))) * 255
-                red = (pix_a * (pix_b / 255) + ((1 - pix_a) * (pix_b / 255))) * 255
-
-                pix[j, i] = int(blue), int(green), int(red)
+                pix[j, i] = pix_r, pix_g, pix_b
 
         return image_out
 
+        #f_rgb = np.array(f_rgb)
 
+
+    def choice_rgbval(self, pix_b, pix_g, pix_r):
+        if self._data_['b'] == 0:
+            pix_b = 0
+        if self._data_['g'] == 0:
+            pix_g = 0
+        if self._data_['r'] == 0:
+            pix_r = 0
+
+        return (pix_b, pix_g, pix_r)
 
     def RGBP(self, width, height, f_rgb):
         self.getsize()
         image_out = Image.new("RGB", (width, height), (0,0,0))
         pix = image_out.load()
+
 
         for i in range(0, height):
             for j in range(0, int(width)):
@@ -272,20 +314,87 @@ class _Parser:
 
 
         return image_out
+"""
+
+        im = array.array('B')
+        im.frombytes(f_rgb.read())
+
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+
+        pix = image_out.load()
+"""
+
+"""
+    def XRGB(self, width, height, f_rgb):
+        self.getsize()
+        sel = 0
+
+        #im = cv2.imread(self._filepath_)
+        im = np.fromstring(f_rgb.tobytes(),np.uint8)
+        im = im.reshape((f_rgb.size[1], f_rgb.size[0], 4))
+
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            sel = 1
+
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_r = pix_g = pix_b = pix_a = 0
+                try:
+                    pix_r, pix_g, pix_b, pix_a = (b for b in f_rgb.read(4))
+
+                except:
+                    pass
+
+                if sel == 1:
+                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+
+                pix[j, i] = pix_r, pix_g, pix_b
+
+        return image_out
+
+        #f_rgb = np.array(f_rgb)
+
+"""
+
+"""
+
+    def XRGB(self, width, height, f_rgb):
+        self.getsize()
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
+        sel = 0
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            sel = 1
+
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_r = pix_g = pix_b = pix_a = 0
+                try:
+                    pix_r, pix_g, pix_b, pix_a = (b for b in f_rgb.read(4))
+                except:
+                    pass
+
+                if sel == 1:
+                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+
+                pix[j, i] = pix_r, pix_g, pix_b
+
+        return image_out
+
+        #f_rgb = np.array(f_rgb)
+
+"""
 
 
+"""
 
-    def choice_rgbval(self, pix_b, pix_g, pix_r):
-        if self._data_['b'] == 0:
-            pix_b = 0
-        if self._data_['g'] == 0:
-            pix_g = 0
-        if self._data_['r'] == 0:
-            pix_r = 0
+        Total_wh = int(self._filesize_ / (self._bpp_ / 8))
+        Want_wh = int(self._bufsize_ / (self._bpp_ / 8))
 
-        return (pix_b, pix_g, pix_r)
-
-
+"""
 
 """
         for i in range(0, height):
@@ -310,4 +419,11 @@ class _Parser:
                     pix_y1 = ord(f_uyvy.read(1))
                     pix_u = ord(f_uyvy.read(1))
                     pix_y2 = ord(f_uyvy.read(1))
+"""
+"""
+            f_val = open(filepath, "rb")
+
+            file = QFile(filepath)
+            self._filesize_ = file.size()  #f_size = w*h*bpp/3
+
 """

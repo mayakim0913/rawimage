@@ -10,7 +10,10 @@ python: 3.6
 
 """
 
+#<<<<<<< HEAD
 #maaya
+#=======
+#>>>>>>> eddcc29e3b9fdaf29cecd37ac5f051a62487b8ac
 #modulization: MVC
 #1 file 1 class!!
 #variable name: same way to either upper or _
