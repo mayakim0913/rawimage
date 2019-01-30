@@ -74,6 +74,7 @@ class TaskThread(QtCore.QThread):
             #time.sleep(0.1)
         self.taskFinished.emit()
 
+
 #Main Window only about V!!
 class MainWindow(QMainWindow):
     count = 0
