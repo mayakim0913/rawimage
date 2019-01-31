@@ -80,6 +80,7 @@ class _Parser:
         print('File w*h:', int(self._filesize_ / (self._bpp_ / 8)))
         print('Want to read file w*h:', int(self._bufsize_ / (self._bpp_ / 8)))
 
+
 #using Dictonary
     def decode(self, choice):
         try:
@@ -120,16 +121,19 @@ class _Parser:
                 self._bufsize_ = width * height * (self._bpp_ / 8)
                 image_out = self.RGBP(width, height, f_val)
 
+            self.getsize()
             data = image_out.tobytes('raw', "RGB")
             qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(qim)
             return pixmap
+
         except FileNotFoundError:
             pass
 
 
+
+
     def YUV422(self, width, height, form, f_uyvy):
-        self.getsize()
         sel = 0
         #im = f_uyvy.read()
         #im = array.array('B')
@@ -209,6 +213,116 @@ class _Parser:
 
 
     def RGB3(self, width, height, form, f_rgb):
+        im = np.fromfile(f_rgb, dtype=np.uint8)
+        im = im.reshape(-1, 3)
+        data = np.asarray(im)
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            a = self.choice_val(im)
+            im = a
+
+        if form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE:
+            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
+        elif form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE:
+            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
+
+        return image_out
+
+
+    def XRGB(self, width, height, f_rgb):
+        im = np.fromfile(f_rgb, dtype=np.uint8)
+        im = im.reshape(-1, 4)
+        im = np.delete(im, 3, 1)
+        im = im.reshape(-1, 3)
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            a = self.choice_val(im)
+            im = a
+
+        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
+
+        return image_out
+
+
+    def choice_val(self, im):
+        if self._data_['r'] == 0:
+            im = np.delete(im, 0, 1)
+            im = np.insert(im, 0, 0, 1)
+        elif self._data_['g'] == 0:
+            im = np.delete(im, 1, 1)
+            im = np.insert(im, 1, 0, 1)
+        elif self._data_['r'] == 0:
+            im = np.delete(im, 2, 1)
+            im = np.insert(im, 2, 0, 1)
+        return im
+
+
+    def RGBP(self, width, height, f_rgb):
+        arr = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
+        arr = 0xFF000000 + ((arr & 0xF800) >> 8) + ((arr & 0x07E0) << 5) + ((arr & 0x001F) << 19)
+        image_out = Image.frombuffer("RGBA",[width, height], arr, 'raw','RGBA', 0, 1)
+
+        return image_out
+
+
+    def choice_rgbval(self, pix_b, pix_g, pix_r):
+        if self._data_['b'] == 0:
+            pix_b = 0
+        if self._data_['g'] == 0:
+            pix_g = 0
+        if self._data_['r'] == 0:
+            pix_r = 0
+
+        return (pix_b, pix_g, pix_r)
+
+
+
+"""
+
+
+    def RGBP(self, width, height, f_rgb):
+        sel = 0
+
+        #im = array.array('B')
+        #im.frombytes(f_rgb.read())
+        im = f_rgb.read()
+
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
+
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            sel = 1
+
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_h = pix_l = 0
+                try:
+                    #pix_h, pix_l = (b for b in f_rgb.read(2))
+                    pix_h = im[(width*i+j)*4]
+                    pix_l = im[(width*i+j)*4+1]
+                except:
+                    pass
+
+                value = pix_l*256 + pix_h
+
+                blue = (value & 0xF800) >> 8
+                green = (value & 0x7E0) >> 3
+                red = (value & 0x1F) << 3
+
+                if sel == 1:
+                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+
+                pix[j, i] = int(red), int(green), int(blue)
+
+
+        return image_out
+
+"""
+
+"""
+
+    def RGB3(self, width, height, form, f_rgb):
         self.getsize()
         sel = 0
 
@@ -248,24 +362,42 @@ class _Parser:
 
         return image_out
 
+"""
+
+
+"""
+
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
+
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            sel = 1
+
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_r = pix_g = pix_b = pix_a = 0
+                if sel == 1:
+                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+
+                pix[j, i] = im[0]
+
 
     def XRGB(self, width, height, f_rgb):
         self.getsize()
         sel = 0
 
-        im = np.fromfile(f_rgb, dtype=np.uint8) #reshape((width, height, int(self._bpp_ / 8)))
-        #a = np.zeros([width, height, 4], dtype=np.uint8)
-
-        #im = a.fromstring(b)
-        ##1. array
-        #im = array.array('B')
-        #im.frombytes(f_rgb.read())
-        ##2. read
-        #im = f_rgb.read()
+        im = np.fromfile(f_rgb, dtype=np.uint8)#.reshape(width, height, int(self._bpp_ / 8))
+        #im = im.reshape(1920,1080,4)
+        #print(im.shape)
+        #print(im.size)
+        #image = np.zeros([width, height, 4], dtype=np.uint8)
+        #image_out = Image.fromarray(im, 'RGBA')
 
         image_out = Image.new("RGB", (width, height), (0,0,0))
         #image_out = np.zeros((width, height, 4), dtype=np.uint8)
         pix = image_out.load()
+
 
         if self._data_ != {'r':1, 'g':1, 'b':1}:
             sel = 1
@@ -285,62 +417,14 @@ class _Parser:
                 if sel == 1:
                     (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
 
-                pix[j, i] = pix_r, pix_g, pix_b
+                pix[j, i] = pix_r, pix_g, pix_b, pix_a
 
-        return image_out
-
-
-
-
-    def RGBP(self, width, height, f_rgb):
-        self.getsize()
-        sel = 0
-
-        #im = array.array('B')
-        #im.frombytes(f_rgb.read())
-        im = f_rgb.read()
-
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
-
-
-        if self._data_ != {'r':1, 'g':1, 'b':1}:
-            sel = 1
-
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_h = pix_l = 0
-                try:
-                    #pix_h, pix_l = (b for b in f_rgb.read(2))
-                    pix_h = im[(width*i+j)*4]
-                    pix_l = im[(width*i+j)*4+1]
-                except:
-                    pass
-
-                value = pix_l*256 + pix_h
-
-                blue = (value & 0xF800) >> 8
-                green = (value & 0x7E0) >> 3
-                red = (value & 0x1F) << 3
-
-                if sel == 1:
-                    (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
-
-                pix[j, i] = int(red), int(green), int(blue)
 
 
         return image_out
 
 
-    def choice_rgbval(self, pix_b, pix_g, pix_r):
-        if self._data_['b'] == 0:
-            pix_b = 0
-        if self._data_['g'] == 0:
-            pix_g = 0
-        if self._data_['r'] == 0:
-            pix_r = 0
-
-        return (pix_b, pix_g, pix_r)
+"""
 
 """
     def XRGB(self, width, height, f_rgb):
