@@ -91,6 +91,8 @@ class MainWindow(QMainWindow):
         self.imgheight = 400
         self.factor = 1.0
         self.pix = None
+        self.pa = None
+        self.tt = None
 
         self.myLongTask = TaskThread()
         self.myLongTask.taskFinished.connect(self.onFinished)
@@ -266,7 +268,7 @@ class MainWindow(QMainWindow):
     def asign_format(self):
         self.onStart()
         start = timer()
-        pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
+        self.pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
         self._format = self.format
 
         if self.format > 0 and self.format < 9:
@@ -315,19 +317,21 @@ class MainWindow(QMainWindow):
                     data['b'] = 0
 
         try:
-            _pixmap = pa.decode(data)
+            _pixmap = self.pa.decode(data)
             self.pix = _pixmap
             self.label_img.setPixmap(self.pix)
             self.LineEdit_width.setText(str(self.imgwidth))
             self.LineEdit_height.setText(str(self.imgheight))
             log = LogObject(self)
             end = timer()
-
+            #self.tt = float(end - start)
             print('Time consumption:', end - start)
             self.statusbar.showMessage("Successfully Loaded: {}".format(self.filepath))
+            self.information()
 
         except TypeError:
             pass
+
 
     def swap_format(self):
         if self.radiobutton_le.isChecked():
@@ -426,6 +430,7 @@ class MainWindow(QMainWindow):
     def auto_detect(self):
         try:
             if self.format > 0 and self.format < 19:
+                print ('yuv')
                 data = {'y':1, 'u':1, 'v':1}
                 for i in range(4):
                     if 0 < self.format < 5:
@@ -447,11 +452,13 @@ class MainWindow(QMainWindow):
                             data['v'] = 0
                         if not self.checkbox_v.isChecked():
                             data['u'] = 0
+                    print(self.format)
                     _pixmap = pa.decode(data)
                     self.pix = _pixmap
                     self.load_to_sub(self.pix)
 
             elif self.format > 10 and self.format < 19:
+                print('rgb')
                 data = {'r':1, 'g':1, 'b':1}
                 for i in range(4):
                     if 10 < self.format < 15:
@@ -478,6 +485,8 @@ class MainWindow(QMainWindow):
                     self.load_to_sub(self.pix)
         except TypeError:
             pass
+
+
 
 #Need to check the performance of each part
 #then, should change! for improve performance(within 5 seconds!!....)
@@ -514,9 +523,35 @@ class MainWindow(QMainWindow):
                 else:
                     text += sep
             result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text))
+            #result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, textself.filepath
         hex_src = '\n'.join(result)
         #print (hex_src)
         self.label_2.setText(hex_src)
+
+
+    def information(self):
+        size, buf, bpp = self.pa.send()
+        info = []
+
+        info.append(('Filename: %s') % (self.filepath))
+        info.append(('Format (in): %d') % (self._format))
+        info.append(("Image Width: %d") % (self.imgwidth))
+        info.append(("Image Height: %d") % (self.imgheight))
+
+        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
+        info.append((" - Filesize (bytes): %d") % (os.stat(self.filepath)[6]))
+        info.append((' - File w*h: %d') % (int(size / (bpp / 8))))
+
+        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
+        info.append((' - Want to read file size(bytes): %d') % (int(buf)))
+        info.append((' - Want to read file w*h: %d') % (int(buf / (bpp / 8))))
+
+        #info.append(('Time consumption: %d') % float(self.tt))
+
+        hi = '\n'.join(info)
+
+        self.label_3.setText(hi)
+
 
 
     def update_size(self):

@@ -6,11 +6,9 @@
 #pip install numexpr==2.6.1
 
 import sys
-import io
 from enum import Enum, IntEnum
 import array
 import inspect
-import numpy as np
 
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QFile
@@ -20,8 +18,8 @@ from main import *
 from LoadPicture import *
 from PIL import Image
 #import cv2
-
-
+import numpy as np
+import array
 
 #Ian's zero pending...bb
 class YUVFormat(IntEnum):
@@ -83,6 +81,9 @@ class _Parser:
 
 
 #using Dictonary
+    def send(self):
+        return self._filesize_, self._bufsize_, self._bpp_
+
     def decode(self, choice):
         try:
             width = self._imgwidth_
@@ -100,29 +101,21 @@ class _Parser:
 
 
             if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
-                self._bpp_ = self.getbpp('YUV422')
-                self._bufsize_ = width * height * (self._bpp_ / 8)
                 image_out = self.YUV422(width, height, form, f_val)
 
-            elif (
+            elif(
                     form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
                     or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
             ):
-                self._bpp_ = self.getbpp('RGB3')
-                self._bufsize_ = width * height * (self._bpp_ / 8)
                 image_out = self.RGB3(width, height, form, f_val)
 
             elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
-                self._bpp_ = self.getbpp('XR24')
-                self._bufsize_ = width * height * (self._bpp_ / 8)
                 image_out = self.XRGB(width, height, f_val)
 
             elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
-                self._bpp_ = self.getbpp('RGBP')
-                self._bufsize_ = width * height * (self._bpp_ / 8)
                 image_out = self.RGBP(width, height, f_val)
 
-            self.getsize()
+            #self.getsize()
             data = image_out.tobytes('raw', "RGB")
             qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(qim)
@@ -131,83 +124,63 @@ class _Parser:
         except FileNotFoundError:
             pass
 
-#This program shows frames of YUV movie (read from stdin), in which each line is multiplexed 4:2:2 component video (Cb Y Cr Y...) format.
-#The program has two versions, in C++ and Python, and uses OpenCV library (tested on 2.4.10)
-
 
     def YUV422(self, width, height, form, f_uyvy):
-        #Each four bytes is two pixels.
-        #Each four bytes is two Y’s, a Cb and a Cr.
-        #Y goes to one of the pixels,
-        #and the Cb and Cr belong to both pixels. As you can see,
-        #the Cr and Cb components have half the horizontal resolution of the Y component.
+        self._bpp_ = self.getbpp('YUV422')
+        self._bufsize_ = width * height * (self._bpp_ / 8)
+        sel = 0
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
 
-        #https://blog.csdn.net/sinat_29957455/article/details/84997327
-        #https://stackoverflow.com/questions/51927792/how-to-write-convert-yuv-array-to-rgb-array
+        if self._data_ != {'y':1, 'u':1, 'v':1}:
+            sel = 1
 
+        for i in range(0, height):
+            for j in range(0, int(width/2)):
+                pix_y1 = pix_u = pix_y2 = pix_v = 0
 
+                if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
+                    try:
+                        pix_y1, pix_u, pix_y2, pix_v = (b for b in f_uyvy.read(4))
 
+                    except:
+                        pass
 
-        #arr = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = im.reshape(-1, 3)
-        #data = np.asarray(im)
+                elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
+                    try:
+                        pix_u, pix_y1, pix_v, pix_y2 = (b for b in f_uyvy.read(4))
 
-        # Read entire file into YUV
-        im = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = np.fromfile(f_uyvy, dtype=np.uint16).astype(np.uint32)
-        #one = im.reshape(-1, 1920) #shape = (2062, 1920)
-        #two = np.delete(one, (2161), axis=0)
-        #three = np.delete(two, (2160), axis=0)
-        #four = three.reshape(-1,4)
+                    except:
+                        pass
 
+                elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
+                    try:
+                        pix_y1, pix_v, pix_y2, pix_u = (b for b in f_uyvy.read(4))
+                    except:
+                        pass
 
-        #im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
-        #1.164(Y - 16), 2.018(U - 128) , 0.813(V - 128), 0.391(U - 128), 1.596(V - 128)
+                elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
+                    try:
+                        pix_v, pix_y1, pix_u, pix_y2 = (b for b in f_uyvy.read(4))
+                    except:
+                        pass
 
-        #Y = im[0:width*height].reshape(height,width)
-        #y = yuv[:width*height].reshape(height, width)
-        #v = yuv[width*height::2].reshape(height/2, width/2)
-        #u = yuv[width*height+1::2].reshape(height/2, width/2)
-
-        y = yuv[:(width*height):].reshape(height, width, 2)
-        v = yuv[:(width*height):2].reshape(height, int(width/2), 2)
-        u = yuv[:(width*height)+1:2].reshape(height, int(width/2), 2)
-
-        # upsample if YV12
-        #u = ndimage.zoom(u, 2, order=0)
-        #v = ndimage.zoom(v, 2, order=0)
-
-        y = y.reshape((y.shape[0], y.shape[1], 2))
-        u = u.reshape((u.shape[0], u.shape[1], 2))
-        v = v.reshape((v.shape[0], v.shape[1], 2))
-
-        #yuv = np.concatenate((y, u, v), axis=2)
-        #yuv = np.hstack((y,u,v))
-
-        yuv = np.dstack((y, u, v))[:height, :width, :].astype(np.float)
-        #yuv[:, :, 0]  = YUV[:, :, 0]  - 16   # Offset Y by 16
-        #yuv[:, :, 1:] = YUV[:, :, 1:] - 128  # Offset UV by 128
+                if sel == 1:
+                    (pix_y1, pix_y2, pix_u, pix_v) = self.choice_yuvval(pix_y1, pix_y2, pix_u, pix_v)
 
 
-        yuv[:, :, 0] = yuv[:, :, 0].clip(16, 235).astype(yuv.dtype) - 16
-        yuv[:, :, 1:] = yuv[:, :, 1:].clip(16, 240).astype(yuv.dtype) - 128
+                red = 1.164 * (pix_y1-16) + 2.018 * (pix_u - 128)
+                green = 1.164 * (pix_y1-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
+                blue = 1.164 * (pix_y1-16) + 1.596 * (pix_v - 128)
+                pix[j*2, i] = int(blue), int(green), int(red)
 
+                red = 1.164 * (pix_y2-16) + 2.018 * (pix_u - 128)
+                green = 1.164 * (pix_y2-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
+                blue = 1.164 * (pix_y2-16) + 1.596 * (pix_v - 128)
+                pix[j*2+1, i] = int(blue), int(green), int(red)
 
-        A = np.array([[1.164, 0.000, 1.793],
-                      [1.164, -0.213, -0.533],
-                      [1.164, 2.112, 0.000]])
-
-        rgb = np.dot(yuv ,A.T).clip(0, 255).astype(np.uint8)
-        im = Image.fromarray(rgb)
-
-        #Creates an image memory referencing pixel data in a byte buffer.
-        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
 
         return image_out
-
-
-
 
     def choice_yuvval(self, _y1, _y2, _u, _v):
         if self._data_['y'] == 0:
@@ -222,6 +195,9 @@ class _Parser:
 
 
     def RGB3(self, width, height, form, f_rgb):
+        self._bpp_ = self.getbpp('RGB3')
+        self._bufsize_ = width * height * (self._bpp_ / 8)
+
         im = np.fromfile(f_rgb, dtype=np.uint8)
         im = im.reshape(-1, 3)
         data = np.asarray(im)
@@ -239,11 +215,11 @@ class _Parser:
 
 
     def XRGB(self, width, height, f_rgb):
-        im = np.fromfile(f_rgb, dtype=np.uint8)
-        #buf = np.zeros([width, height, 3], dtype=np.uint8)
-        #buf[60:-60,:,:] = imm[:,:,:-1]
-        #im = buf
+        self._bpp_ = self.getbpp('XR24')
+        self._bufsize_ = width * height * (self._bpp_ / 8)
 
+        im = np.fromfile(f_rgb, dtype=np.uint8)
+        im = im.reshape(-1, 4)
         im = np.delete(im, 3, 1)
         im = im.reshape(-1, 3)
 
@@ -251,27 +227,18 @@ class _Parser:
             a = self.choice_val(im)
             im = a
 
-        #buf = np.zeros([width, height, 3], dtype=np.uint8)
-        #buf[:] = im
-
-        #h = len(buf)  #1920
-        #w = len(buf[0])  #1080
-
-        #for i in range(0, height):
-        #for y in range(h):
-            #for x in range(w):
-                #buf[y,x] = [255,255,255]
-
-        image_out = Image.frombytes("RGB",[width, height], im, 'raw','RGB', 0, 1)
+        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
 
         return image_out
 
 
 
     def RGBP(self, width, height, f_rgb):
+        self._bpp_ = self.getbpp('RGBP')
+        self._bufsize_ = width * height * (self._bpp_ / 8)
+
         #RRRR RGGG GGGB BBBB
         im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
-        #To convert the type of an array, use the .astype() method (preferred) or the type itself as a function
 
         #alpha = 0xff
         blue = ((im & 0xF800) >> 8) # (arr & 0xf800) >> 11; b << 3;
@@ -303,122 +270,6 @@ class _Parser:
             im = np.delete(im, 2, 1)
             im = np.insert(im, 2, 0, 1)
         return im
-
-"""
-
-
-    def YUV422(self, width, height, form, f_uyvy):
-        #arr = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = im.reshape(-1, 3)
-        #data = np.asarray(im)
-
-        # Read entire file into YUV
-        yuv = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = np.fromfile(f_uyvy, dtype=np.uint16).astype(np.uint32)
-        #one = im.reshape(-1, 1920) #shape = (2062, 1920)
-        #two = np.delete(one, (2161), axis=0)
-        #three = np.delete(two, (2160), axis=0)
-
-
-        #im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
-        #1.164(Y - 16), 2.018(U - 128) , 0.813(V - 128), 0.391(U - 128), 1.596(V - 128)
-
-        #Y = im[0:width*height].reshape(height,width)
-        #y = yuv[:width*height].reshape(height, width)
-        #v = yuv[width*height::2].reshape(height/2, width/2)
-        #u = yuv[width*height+1::2].reshape(height/2, width/2)
-
-        y = yuv[:(width*height):].reshape(height, width)
-        v = yuv[:(width*height):2].reshape(int(height), int(width/2))
-        u = yuv[:(width*height)+1:2].reshape(int(height), int(width/2))
-
-        # upsample if YV12
-        #u = ndimage.zoom(u, 2, order=0)
-        #v = ndimage.zoom(v, 2, order=0)
-
-        y = y.reshape((y.shape[0], y.shape[1], 1))
-        u = u.reshape((u.shape[0], u.shape[1], 1))
-        v = v.reshape((v.shape[0], v.shape[1], 1))
-
-        yuv = np.concatenate((y, u, v), axis=2)
-
-        yuv = np.dstack((y, u, v))[:height, :width, :].astype(np.float)
-        #yuv[:, :, 0]  = YUV[:, :, 0]  - 16   # Offset Y by 16
-        #yuv[:, :, 1:] = YUV[:, :, 1:] - 128  # Offset UV by 128
-
-
-        yuv[:, :, 0] = yuv[:, :, 0].clip(16, 235).astype(yuv.dtype) - 16
-        yuv[:, :, 1:] = yuv[:, :, 1:].clip(16, 240).astype(yuv.dtype) - 128
-
-
-        A = np.array([[1.164, 0.000, 1.793],
-                      [1.164, -0.213, -0.533],
-                      [1.164, 2.112, 0.000]])
-
-        rgb = np.dot(yuv ,A.T).clip(0, 255).astype(np.uint8)
-        im = Image.fromarray(rgb)
-
-        #Creates an image memory referencing pixel data in a byte buffer.
-        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
-
-        return image_out
-
-"""
-
-
-"""
-
-
-    def YUV422(self, width, height, form, f_uyvy):
-        #arr = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = im.reshape(-1, 3)
-        #data = np.asarray(im)
-
-        # Read entire file into YUV
-        yuv = np.fromfile(f_uyvy, dtype=np.uint8)
-        #im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
-        #1.164(Y - 16), 2.018(U - 128) , 0.813(V - 128), 0.391(U - 128), 1.596(V - 128)
-
-        #Y = im[0:width*height].reshape(height,width)
-        y = yuv[:width*height].reshape(height, width)
-        v = yuv[width*height::2].reshape(height/2, width/2)
-        u = yuv[width*height+1::2].reshape(height/2, width/2)
-
-        # upsample if YV12
-        #u = ndimage.zoom(u, 2, order=0)
-        #v = ndimage.zoom(v, 2, order=0)
-
-        y = y.reshape((y.shape[0], y.shape[1], 1))
-        u = u.reshape((u.shape[0], u.shape[1], 1))
-        v = v.reshape((v.shape[0], v.shape[1], 1))
-
-        yuv = np.concatenate((y, u, v), axis=2)
-
-        yuv = np.dstack((y, u, v))[:height, :width, :].astype(np.float)
-        #yuv[:, :, 0]  = YUV[:, :, 0]  - 16   # Offset Y by 16
-        #yuv[:, :, 1:] = YUV[:, :, 1:] - 128  # Offset UV by 128
-
-
-        yuv[:, :, 0] = yuv[:, :, 0].clip(16, 235).astype(yuv.dtype) - 16
-        yuv[:, :, 1:] = yuv[:, :, 1:].clip(16, 240).astype(yuv.dtype) - 128
-
-
-        A = np.array([[1.164, 0.000, 1.793],
-                      [1.164, -0.213, -0.533],
-                      [1.164, 2.112, 0.000]])
-
-        rgb = np.dot(yuv ,A.T).clip(0, 255).astype(np.uint8)
-        im = Image.fromarray(rgb)
-
-        #Creates an image memory referencing pixel data in a byte buffer.
-        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
-
-        return image_out
-
-"""
-
 """
 
 
