@@ -332,6 +332,27 @@ class MainWindow(QMainWindow):
         except TypeError:
             pass
 
+    def information(self):
+        size, buf, bpp = self.pa.send()
+
+        info = []
+
+        info.append(('Filename: %s') % (self.filepath))
+        info.append(('Format (in): %d') % (self._format))
+        info.append(("Image Width: %d") % (self.imgwidth))
+        info.append(("Image Height: %d") % (self.imgheight))
+
+        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
+        info.append((" - Filesize (bytes): %d") % (int(size)))
+        info.append((' - File w*h: %d') % (int(size / (bpp / 8))))
+        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
+        info.append((' - Want to read file size(bytes): %d') % (int(buf)))
+        info.append((' - Want to read file w*h: %d') % (int(buf / (bpp / 8))))
+
+        _info = '\n'.join(info)
+
+        self.label_info.setText(_info)
+
 
     def swap_format(self):
         if self.radiobutton_le.isChecked():
@@ -429,8 +450,10 @@ class MainWindow(QMainWindow):
 
     def auto_detect(self):
         try:
-            if self.format > 0 and self.format < 19:
-                print ('yuv')
+            rgb, yuv = [], []
+            rgb = RGBFormat
+            yuv = YUVFormat
+            if self.format in yuv:
                 data = {'y':1, 'u':1, 'v':1}
                 for i in range(4):
                     if 0 < self.format < 5:
@@ -452,13 +475,11 @@ class MainWindow(QMainWindow):
                             data['v'] = 0
                         if not self.checkbox_v.isChecked():
                             data['u'] = 0
-                    print(self.format)
                     _pixmap = pa.decode(data)
                     self.pix = _pixmap
                     self.load_to_sub(self.pix)
 
-            elif self.format > 10 and self.format < 19:
-                print('rgb')
+            elif self.format in rgb:
                 data = {'r':1, 'g':1, 'b':1}
                 for i in range(4):
                     if 10 < self.format < 15:
@@ -527,31 +548,6 @@ class MainWindow(QMainWindow):
         hex_src = '\n'.join(result)
         #print (hex_src)
         self.label_2.setText(hex_src)
-
-
-    def information(self):
-        size, buf, bpp = self.pa.send()
-        info = []
-
-        info.append(('Filename: %s') % (self.filepath))
-        info.append(('Format (in): %d') % (self._format))
-        info.append(("Image Width: %d") % (self.imgwidth))
-        info.append(("Image Height: %d") % (self.imgheight))
-
-        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
-        info.append((" - Filesize (bytes): %d") % (os.stat(self.filepath)[6]))
-        info.append((' - File w*h: %d') % (int(size / (bpp / 8))))
-
-        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
-        info.append((' - Want to read file size(bytes): %d') % (int(buf)))
-        info.append((' - Want to read file w*h: %d') % (int(buf / (bpp / 8))))
-
-        #info.append(('Time consumption: %d') % float(self.tt))
-
-        hi = '\n'.join(info)
-
-        self.label_3.setText(hi)
-
 
 
     def update_size(self):
