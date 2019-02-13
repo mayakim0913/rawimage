@@ -45,7 +45,6 @@ class RGBFormat(IntEnum):
     RGBP_BE = 18
 
 
-
 class _Parser:
     __DECODE_MAP = {
         #color:[bit per pixel, desc]
@@ -119,14 +118,15 @@ class _Parser:
         #Y goes to one of the pixels,
         #and the Cb and Cr belong to both pixels. As you can see,
         #the Cr and Cb components have half the horizontal resolution of the Y component.
+
         self._bpp_ = self.getbpp('YUV422')
         self._bufsize_ = width * height * (self._bpp_ / 8)
 
         # Read entire file into YUV
         im = np.fromfile(f_uyvy, dtype=np.uint8)
-        width = 1920
-        height = 1080
-        wh = width * height
+        width = self._imgwidth_
+        height = self._imgheight_
+        wh = int(self._filesize_ / (self._bpp_ / 8))
 
         if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
             try:
@@ -170,8 +170,8 @@ class _Parser:
         V = V.copy(order='C')
         Y2 = Y2.copy(order='C')
 
-        UV = np.zeros((width*height), dtype=np.uint8)
-        YY = np.zeros((width*height), dtype=np.uint8)
+        UV = np.zeros(wh, dtype=np.uint8)
+        YY = np.zeros(wh, dtype=np.uint8)
 
         if self._data_ != {'y':1, 'u':1, 'v':1}:
             Y1, Y2, U, V = self.choice_yuvval(Y1, Y2, U, V)
@@ -181,21 +181,20 @@ class _Parser:
                 form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE
                 or form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE
         ):
-            UV[0::2] = np.fromstring(V,  dtype=np.uint8)
-            UV[1::2] = np.fromstring(U,  dtype=np.uint8)
+            UV[0::2] = np.fromstring(V, dtype=np.uint8)
+            UV[1::2] = np.fromstring(U, dtype=np.uint8)
         elif(
                 form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE
                 or form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE
         ):
-            UV[0::2] = np.fromstring(V,  dtype=np.uint8)
-            UV[1::2] = np.fromstring(U,  dtype=np.uint8)
-
+            UV[0::2] = np.fromstring(V, dtype=np.uint8)
+            UV[1::2] = np.fromstring(U, dtype=np.uint8)
 
         YY[0::2] = np.fromstring(Y1, dtype=np.uint8)
         YY[1::2] = np.fromstring(Y2, dtype=np.uint8)
 
-        UV = UV.reshape(height, width)
-        YY = YY.reshape(height, width)
+        #UV = UV.reshape(height, width)
+        #YY = YY.reshape(height, width)
 
         yuv422 = cv2.merge([UV, YY])
 
@@ -222,7 +221,10 @@ class _Parser:
         self._bufsize_ = width * height * (self._bpp_ / 8)
 
         im = np.fromfile(f_rgb, dtype=np.uint8)
+        #buf = numpy.zeros((width, height, 1), dtype=numpy.uint8)
+
         im = im.reshape(-1, 3)
+        #im = im.reshape(width, height, 3)
         data = np.asarray(im)
 
         if self._data_ != {'r':1, 'g':1, 'b':1}:
@@ -281,6 +283,7 @@ class _Parser:
         image_out = Image.frombuffer("RGBA",[width, height], im, 'raw','RGBA', 0, 1)
 
         return image_out
+
 
     def choice_val(self, im):
         if self._data_['r'] == 0:

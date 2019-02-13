@@ -189,14 +189,15 @@ class MainWindow(QMainWindow):
 
 
     def save_dialog(self):
-        self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
-        self.filepath = self.fname
-        pixmap = self.pix
-        obj = pixmap.toImage()
-        obj.save(self.filepath, "PNG")
-        self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
-
-
+        try:
+            self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
+            self.filepath = self.fname
+            pixmap = self.pix
+            obj = pixmap.toImage()
+            obj.save(self.filepath, "PNG")
+            self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
+        except AttributeError:
+            pass
 
     def checkbox_state(self):
         before_format = self._format
@@ -423,31 +424,6 @@ class MainWindow(QMainWindow):
         self.asign_format()
 
 
-    def load_to_sub(self, picture):
-        MainWindow.count = MainWindow.count+1
-
-        sub = QMdiSubWindow(self)
-        loaded_picture = LoadPicture(picture, sub)
-
-        sub.setWidget(loaded_picture)
-        sub.setObjectName("Load_Picture_window")
-        sub.setWindowTitle("New Photo"+str(MainWindow.count))
-        self.mdiArea.addSubWindow(sub)
-
-        sub.show()
-        sub.resize(500, 500)
-        loaded_picture.log.MousePixmapSignal.connect(self.update_pixel)
-
-
-    def update_pixel(self, point, color):
-        self.UserInput_PixelValue_X.setText("{}".format(point.x()))
-        self.UserInput_PixelValue_Y.setText("{}".format(point.y()))
-
-        self.UserInput_PixelValue_R.setText("{}".format(color.red()))
-        self.UserInput_PixelValue_G.setText("{}".format(color.green()))
-        self.UserInput_PixelValue_B.setText("{}".format(color.blue()))
-
-
     def auto_detect(self):
         try:
             rgb, yuv = [], []
@@ -508,10 +484,56 @@ class MainWindow(QMainWindow):
             pass
 
 
+    def load_to_sub(self, picture):
+        MainWindow.count = MainWindow.count+1
+
+        sub = QMdiSubWindow(self)
+        loaded_picture = LoadPicture(picture, sub)
+
+        sub.setWidget(loaded_picture)
+        sub.setObjectName("Load_Picture_window")
+
+        form = None
+        if self.format == 1 or self.format == 5:
+            form = "YUYV Format"
+        elif self.format == 2 or self.format == 6:
+            form = "UYVY Format"
+        elif self.format == 3 or self.format == 7:
+            form = "YVYU Format"
+        elif self.format == 4 or self.format == 8:
+            form = "VYUY Format"
+
+        elif(
+                self.format == 11 or self.format == 15
+                or self.format == 12 or self.format == 16
+            ):
+            form = "RGB888 Format"
+        elif self.format == 13 or self.format == 17:
+            form = "XR24 Format"
+        elif self.format == 14 or self.format == 18:
+            form = "RGBP Format"
+
+        sub.setWindowTitle("[New photo"+str(MainWindow.count) + "] " +form)
+        self.mdiArea.addSubWindow(sub)
+
+        sub.show()
+        sub.resize(500, 500)
+        loaded_picture.log.MousePixmapSignal.connect(self.update_pixel)
+
+
+    def update_pixel(self, point, color):
+        self.UserInput_PixelValue_X.setText("{}".format(point.x()))
+        self.UserInput_PixelValue_Y.setText("{}".format(point.y()))
+
+        self.UserInput_PixelValue_R.setText("{}".format(color.red()))
+        self.UserInput_PixelValue_G.setText("{}".format(color.green()))
+        self.UserInput_PixelValue_B.setText("{}".format(color.blue()))
+
 
 #Need to check the performance of each part
 #then, should change! for improve performance(within 5 seconds!!....)
     def hex_detect(self):
+        start = timer()
         src = open(self.filepath, "rb").read()
         length = 16
         sep = ''
@@ -546,8 +568,10 @@ class MainWindow(QMainWindow):
             result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text))
             #result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, textself.filepath
         hex_src = '\n'.join(result)
-        #print (hex_src)
         self.label_2.setText(hex_src)
+        log = LogObject(self)
+        end = timer()
+        print(end - start)
 
 
     def update_size(self):
