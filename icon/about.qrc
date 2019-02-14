@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="about">
-    <file>about.png</file>
-    <file>about.qrc</file>
-  </qresource>
-</RCC>
