@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>981</width>
-    <height>763</height>
+    <width>1196</width>
+    <height>910</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,106 +17,30 @@
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_11">
+   <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0">
      <widget class="QWidget" name="widget" native="true">
-      <layout class="QGridLayout" name="gridLayout_4">
+      <layout class="QGridLayout" name="gridLayout_6">
        <item row="0" column="0">
-        <widget class="QTabWidget" name="tabWidget_5">
-         <property name="currentIndex">
-          <number>0</number>
+        <widget class="QScrollArea" name="scrollArea_2">
+         <property name="widgetResizable">
+          <bool>true</bool>
          </property>
-         <widget class="QWidget" name="tab_4">
-          <attribute name="title">
-           <string>Gfx</string>
-          </attribute>
+         <widget class="QWidget" name="scrollAreaWidgetContents_2">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>736</width>
+            <height>623</height>
+           </rect>
+          </property>
           <layout class="QGridLayout" name="gridLayout_3">
            <item row="0" column="0">
-            <widget class="QScrollArea" name="scrollArea_2">
-             <property name="widgetResizable">
-              <bool>true</bool>
+            <widget class="QLabel" name="label_img">
+             <property name="text">
+              <string/>
              </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_2">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>545</width>
-                <height>587</height>
-               </rect>
-              </property>
-              <layout class="QGridLayout" name="gridLayout_7">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_img">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="tab">
-          <attribute name="title">
-           <string>Hex</string>
-          </attribute>
-          <layout class="QGridLayout" name="gridLayout_12">
-           <item row="0" column="0">
-            <widget class="QScrollArea" name="scrollArea_3">
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_3">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>545</width>
-                <height>587</height>
-               </rect>
-              </property>
-              <layout class="QGridLayout" name="gridLayout_13">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="tab_5">
-          <attribute name="title">
-           <string>Auto</string>
-          </attribute>
-          <layout class="QGridLayout" name="gridLayout_8">
-           <item row="0" column="0">
-            <widget class="QScrollArea" name="scrollArea">
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>545</width>
-                <height>587</height>
-               </rect>
-              </property>
-              <layout class="QGridLayout" name="gridLayout">
-               <item row="0" column="0">
-                <widget class="QMdiArea" name="mdiArea"/>
-               </item>
-              </layout>
-             </widget>
             </widget>
            </item>
           </layout>
@@ -124,129 +48,212 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QSplitter" name="splitter_2">
+        <widget class="QSplitter" name="splitter">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
+         <widget class="QTabWidget" name="tabWidget_4">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tab_3">
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <attribute name="title">
+            <string>Format</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QComboBox" name="comb_format">
+              <property name="currentIndex">
+               <number>1</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>YUV422_YUYV</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>YUV422_UYVY</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>YUV422_YVYU</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>YUV422_VYUY</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+         <widget class="QTabWidget" name="tabWidget_3">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tab_2">
+           <attribute name="title">
+            <string>Size</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                 <widget class="QLineEdit" name="LineEdit_width"/>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label">
+                  <property name="text">
+                   <string>x</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="LineEdit_height"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QPushButton" name="apply_button">
+                <property name="text">
+                 <string>Apply</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+         <widget class="QTabWidget" name="tabWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tab">
+           <attribute name="title">
+            <string>Endianess</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QRadioButton" name="radiobutton_be">
+                <property name="text">
+                 <string>BE</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radiobutton_le">
+                <property name="text">
+                 <string>LE</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
          <widget class="QGroupBox" name="groupBox">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
           <property name="title">
-           <string>Format</string>
+           <string>Channels</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_6">
-           <item row="0" column="0">
-            <widget class="QComboBox" name="comb_format">
-             <property name="currentIndex">
-              <number>0</number>
-             </property>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <property name="text">
-               <string>YUYV</string>
-              </property>
+              <widget class="QCheckBox" name="checkbox_b">
+               <property name="text">
+                <string>B</string>
+               </property>
+              </widget>
              </item>
              <item>
-              <property name="text">
-               <string>UYVY</string>
-              </property>
+              <widget class="QCheckBox" name="checkbox_g">
+               <property name="text">
+                <string>G</string>
+               </property>
+              </widget>
              </item>
              <item>
-              <property name="text">
-               <string>YVYU</string>
-              </property>
+              <widget class="QCheckBox" name="checkbox_r">
+               <property name="text">
+                <string>R</string>
+               </property>
+              </widget>
              </item>
-             <item>
-              <property name="text">
-               <string>VYUY</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>BGR3</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>RGB3</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>XR24</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>RGBP</string>
-              </property>
-             </item>
-            </widget>
+            </layout>
            </item>
           </layout>
          </widget>
          <widget class="QGroupBox" name="groupBox_2">
           <property name="title">
-           <string>Size</string>
+           <string/>
           </property>
-          <layout class="QGridLayout" name="gridLayout_9">
-           <item row="0" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <item>
-                <widget class="QLineEdit" name="LineEdit_width">
-                 <property name="text">
-                  <string>400</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="label">
-                 <property name="text">
-                  <string>x</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="LineEdit_height">
-                 <property name="text">
-                  <string>400</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <widget class="QCheckBox" name="checkbox_y">
+               <property name="text">
+                <string>Y</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <property name="tristate">
+                <bool>true</bool>
+               </property>
+              </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="apply_button">
+              <widget class="QCheckBox" name="checkbox_u">
                <property name="text">
-                <string>Apply</string>
+                <string>U</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkbox_v">
+               <property name="text">
+                <string>V</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
                </property>
               </widget>
              </item>
             </layout>
            </item>
-          </layout>
-          <zorder></zorder>
-         </widget>
-         <widget class="QGroupBox" name="groupBox_3">
-          <property name="title">
-           <string>Endianess</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_10">
-           <item row="0" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QRadioButton" name="radiobutton_be">
+              <widget class="QCheckBox" name="checkbox__a_yuv">
                <property name="text">
-                <string>BE</string>
+                <string>A</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radiobutton_le">
+              <widget class="QCheckBox" name="checkbox_swap">
                <property name="text">
-                <string>LE</string>
+                <string>Swap UV</string>
                </property>
               </widget>
              </item>
@@ -254,122 +261,10 @@
            </item>
           </layout>
          </widget>
-         <widget class="QSplitter" name="splitter">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
+         <widget class="QPushButton" name="pushbutton_autodetection">
+          <property name="text">
+           <string>AutoDetection</string>
           </property>
-          <widget class="QGroupBox" name="group_rgb">
-           <property name="title">
-            <string>Channels</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <item>
-               <widget class="QCheckBox" name="checkbox_r">
-                <property name="text">
-                 <string>R</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkbox_g">
-                <property name="text">
-                 <string>G</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkbox_b">
-                <property name="text">
-                 <string>B</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QGroupBox" name="group_yuv">
-           <property name="title">
-            <string/>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
-              <item>
-               <widget class="QCheckBox" name="checkbox_y">
-                <property name="text">
-                 <string>Y</string>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-                <property name="tristate">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkbox_u">
-                <property name="text">
-                 <string>U</string>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkbox_v">
-                <property name="text">
-                 <string>V</string>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <item>
-               <widget class="QCheckBox" name="checkbox__a_yuv">
-                <property name="text">
-                 <string>A</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkbox_swap">
-                <property name="text">
-                 <string>Swap UV</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="layoutWidget">
-          <layout class="QHBoxLayout" name="horizontalLayout_8">
-           <item>
-            <widget class="QPushButton" name="auto_btn">
-             <property name="text">
-              <string>AutoDetection</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="hex_btn">
-             <property name="text">
-              <string>Hex button</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </widget>
          <widget class="QTabWidget" name="tabWidget_2">
           <property name="currentIndex">
@@ -425,6 +320,9 @@
                   </property>
                  </widget>
                 </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="UserInput_PixelValue_G"/>
+                </item>
                 <item row="0" column="1">
                  <widget class="QLineEdit" name="UserInput_PixelValue_R"/>
                 </item>
@@ -435,53 +333,34 @@
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="1">
-                 <widget class="QLineEdit" name="UserInput_PixelValue_G"/>
-                </item>
                </layout>
               </item>
              </layout>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_2">
-           <attribute name="title">
-            <string>Ifo.</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_14">
-            <item row="1" column="0">
-             <widget class="QScrollArea" name="scrollArea_4">
-              <property name="widgetResizable">
-               <bool>true</bool>
-              </property>
-              <widget class="QWidget" name="scrollAreaWidgetContents_4">
-               <property name="geometry">
-                <rect>
-                 <x>0</x>
-                 <y>0</y>
-                 <width>346</width>
-                 <height>139</height>
-                </rect>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_15">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_info">
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </widget>
-            </item>
-           </layout>
-          </widget>
          </widget>
-         <widget class="QProgressBar" name="pg">
-          <property name="value">
-           <number>0</number>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QScrollArea" name="scrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>1158</width>
+            <height>158</height>
+           </rect>
           </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QMdiArea" name="mdiArea"/>
+           </item>
+          </layout>
          </widget>
         </widget>
        </item>
@@ -495,8 +374,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>981</width>
-     <height>25</height>
+     <width>1196</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -531,9 +410,7 @@
     <string>toolBar</string>
    </property>
    <property name="styleSheet">
-    <string notr="true">selection-color: rgb(7, 148, 229);
-
-</string>
+    <string notr="true"/>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>

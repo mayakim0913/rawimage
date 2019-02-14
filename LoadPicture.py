@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-#pylint:disble=missing-docstring
-#pylint:disable=no-name-in-module
-
 import sys
 import os
 
@@ -11,7 +6,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from main import *
-from Parser import *
 
 
 class LogObject(QObject):
@@ -42,7 +36,7 @@ class PictureItem(QGraphicsPixmapItem):
 class LoadPicture(QWidget):
     def __init__(self, pixmap, parent=None):
         QWidget.__init__(self, parent)
-        self.setupUi(self)
+	self.setupUi(self)
         self.log = LogObject(self)
         self.PictureArea.setScene(QGraphicsScene())
         self.item = PictureItem(self.log, pixmap)
@@ -82,6 +76,7 @@ class LoadPicture(QWidget):
         self.scene=QGraphicsScene()
         self.pixitem=QGraphicsPixmapItem()
         self.grali=[]
+
 
     def setpicture(self,pixmap):
         self.pixitem.setPixmap(pixmap)
