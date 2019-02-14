@@ -2,16 +2,17 @@
 # -*- coding: utf-8 -*-
 #pylint:disble=missing-docstring
 #pylint:disable=no-name-in-module
+
 """
 
 This script converts raw image to other image format
 Form implementation generated from reading ui file 'widget.ui'
-python: 3.6
+python: 3.6(++)
 
 """
 
 #modulization: MVC
-#1 file 1 class!!
+#1 file 1 class!
 #variable name: same way to either upper or _
 
 #M: parsing
