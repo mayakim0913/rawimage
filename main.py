@@ -2,17 +2,20 @@
 # -*- coding: utf-8 -*-
 #pylint:disble=missing-docstring
 #pylint:disable=no-name-in-module
-
 """
 
 This script converts raw image to other image format
 Form implementation generated from reading ui file 'widget.ui'
-python: 3.6(++)
+python: 3.6
 
 """
 
+#<<<<<<< HEAD
+#maaya
+#=======
+#>>>>>>> eddcc29e3b9fdaf29cecd37ac5f051a62487b8ac
 #modulization: MVC
-#1 file 1 class!
+#1 file 1 class!!
 #variable name: same way to either upper or _
 
 #M: parsing
@@ -23,7 +26,6 @@ python: 3.6(++)
 from enum import Enum, IntEnum
 import sys
 import os
-import time
 
 #2. THIRD
 from PyQt5 import (Qt, QtCore, QtGui, QtWidgets, uic)
@@ -66,16 +68,6 @@ class RGBFormat(IntEnum):
     XR24_BE = 17
     RGBP_BE = 18
 
-class TaskThread(QtCore.QThread):
-    #taskFinished = QtCore.pyqtSignal(int)
-    taskFinished = QtCore.pyqtSignal()
-    def run(self):
-        #for i in range(101):
-            #self.taskFinished.emit(i)
-            #time.sleep(0.1)
-        self.taskFinished.emit()
-
-
 #Main Window only about V!!
 class MainWindow(QMainWindow):
     count = 0
@@ -92,11 +84,6 @@ class MainWindow(QMainWindow):
         self.imgheight = 400
         self.factor = 1.0
         self.pix = None
-        self.pa = None
-        self.tt = None
-
-        self.myLongTask = TaskThread()
-        self.myLongTask.taskFinished.connect(self.onFinished)
 
 #DELETE TO DESIGNER
     def action_icon(self):
@@ -189,16 +176,16 @@ class MainWindow(QMainWindow):
         self.asign_format()
 
 
+
     def save_dialog(self):
-        try:
-            self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
-            self.filepath = self.fname
-            pixmap = self.pix
-            obj = pixmap.toImage()
-            obj.save(self.filepath, "PNG")
-            self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
-        except AttributeError:
-            pass
+        self.fname, _ = QFileDialog.getSaveFileName(self, 'Save file', '', '*.png')
+        self.filepath = self.fname
+        pixmap = self.pix
+        obj = pixmap.toImage()
+        obj.save(self.filepath, "PNG")
+        self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
+
+
 
     def checkbox_state(self):
         before_format = self._format
@@ -258,19 +245,10 @@ class MainWindow(QMainWindow):
         self.checkbox_state()
         self.match_format()
 
-    def onStart(self):
-        self.pg.setRange(0,0)
-        self.myLongTask.start()
-
-    def onFinished(self):
-        self.pg.setRange(0,1)
-        self.pg.setValue(1)
-
 
     def asign_format(self):
-        self.onStart()
         start = timer()
-        self.pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
+        pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
         self._format = self.format
 
         if self.format > 0 and self.format < 9:
@@ -319,42 +297,19 @@ class MainWindow(QMainWindow):
                     data['b'] = 0
 
         try:
-            _pixmap = self.pa.decode(data)
+            _pixmap = pa.decode(data)
             self.pix = _pixmap
             self.label_img.setPixmap(self.pix)
             self.LineEdit_width.setText(str(self.imgwidth))
             self.LineEdit_height.setText(str(self.imgheight))
             log = LogObject(self)
             end = timer()
-            #self.tt = float(end - start)
+
             print('Time consumption:', end - start)
             self.statusbar.showMessage("Successfully Loaded: {}".format(self.filepath))
-            self.information()
 
         except TypeError:
             pass
-
-    def information(self):
-        size, buf, bpp = self.pa.send()
-
-        info = []
-
-        info.append(('Filename: %s') % (self.filepath))
-        info.append(('Format (in): %d') % (self._format))
-        info.append(("Image Width: %d") % (self.imgwidth))
-        info.append(("Image Height: %d") % (self.imgheight))
-
-        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
-        info.append((" - Filesize (bytes): %d") % (int(size)))
-        info.append((' - File w*h: %d') % (int(size / (bpp / 8))))
-        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
-        info.append((' - Want to read file size(bytes): %d') % (int(buf)))
-        info.append((' - Want to read file w*h: %d') % (int(buf / (bpp / 8))))
-
-        _info = '\n'.join(info)
-
-        self.label_info.setText(_info)
-
 
     def swap_format(self):
         if self.radiobutton_le.isChecked():
@@ -425,12 +380,34 @@ class MainWindow(QMainWindow):
         self.asign_format()
 
 
+    def load_to_sub(self, picture):
+        MainWindow.count = MainWindow.count+1
+
+        sub = QMdiSubWindow(self)
+        loaded_picture = LoadPicture(picture, sub)
+
+        sub.setWidget(loaded_picture)
+        sub.setObjectName("Load_Picture_window")
+        sub.setWindowTitle("New Photo"+str(MainWindow.count))
+        self.mdiArea.addSubWindow(sub)
+
+        sub.show()
+        sub.resize(500, 500)
+        loaded_picture.log.MousePixmapSignal.connect(self.update_pixel)
+
+
+    def update_pixel(self, point, color):
+        self.UserInput_PixelValue_X.setText("{}".format(point.x()))
+        self.UserInput_PixelValue_Y.setText("{}".format(point.y()))
+
+        self.UserInput_PixelValue_R.setText("{}".format(color.red()))
+        self.UserInput_PixelValue_G.setText("{}".format(color.green()))
+        self.UserInput_PixelValue_B.setText("{}".format(color.blue()))
+
+
     def auto_detect(self):
         try:
-            rgb, yuv = [], []
-            rgb = RGBFormat
-            yuv = YUVFormat
-            if self.format in yuv:
+            if self.format > 0 and self.format < 19:
                 data = {'y':1, 'u':1, 'v':1}
                 for i in range(4):
                     if 0 < self.format < 5:
@@ -456,7 +433,7 @@ class MainWindow(QMainWindow):
                     self.pix = _pixmap
                     self.load_to_sub(self.pix)
 
-            elif self.format in rgb:
+            elif self.format > 10 and self.format < 19:
                 data = {'r':1, 'g':1, 'b':1}
                 for i in range(4):
                     if 10 < self.format < 15:
@@ -484,57 +461,9 @@ class MainWindow(QMainWindow):
         except TypeError:
             pass
 
-
-    def load_to_sub(self, picture):
-        MainWindow.count = MainWindow.count+1
-
-        sub = QMdiSubWindow(self)
-        loaded_picture = LoadPicture(picture, sub)
-
-        sub.setWidget(loaded_picture)
-        sub.setObjectName("Load_Picture_window")
-
-        form = None
-        if self.format == 1 or self.format == 5:
-            form = "YUYV Format"
-        elif self.format == 2 or self.format == 6:
-            form = "UYVY Format"
-        elif self.format == 3 or self.format == 7:
-            form = "YVYU Format"
-        elif self.format == 4 or self.format == 8:
-            form = "VYUY Format"
-
-        elif(
-                self.format == 11 or self.format == 15
-                or self.format == 12 or self.format == 16
-            ):
-            form = "RGB888 Format"
-        elif self.format == 13 or self.format == 17:
-            form = "XR24 Format"
-        elif self.format == 14 or self.format == 18:
-            form = "RGBP Format"
-
-        sub.setWindowTitle("[New photo"+str(MainWindow.count) + "] " +form)
-        self.mdiArea.addSubWindow(sub)
-
-        sub.show()
-        sub.resize(500, 500)
-        loaded_picture.log.MousePixmapSignal.connect(self.update_pixel)
-
-
-    def update_pixel(self, point, color):
-        self.UserInput_PixelValue_X.setText("{}".format(point.x()))
-        self.UserInput_PixelValue_Y.setText("{}".format(point.y()))
-
-        self.UserInput_PixelValue_R.setText("{}".format(color.red()))
-        self.UserInput_PixelValue_G.setText("{}".format(color.green()))
-        self.UserInput_PixelValue_B.setText("{}".format(color.blue()))
-
-
 #Need to check the performance of each part
 #then, should change! for improve performance(within 5 seconds!!....)
     def hex_detect(self):
-        start = timer()
         src = open(self.filepath, "rb").read()
         length = 16
         sep = ''
@@ -567,12 +496,9 @@ class MainWindow(QMainWindow):
                 else:
                     text += sep
             result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text))
-            #result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, textself.filepath
         hex_src = '\n'.join(result)
+        #print (hex_src)
         self.label_2.setText(hex_src)
-        log = LogObject(self)
-        end = timer()
-        print(end - start)
 
 
     def update_size(self):
