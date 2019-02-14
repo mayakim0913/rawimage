@@ -3,25 +3,18 @@
 #pylint:disble = missing-docstring
 #pylint:disable = no-name-in-module
 
-#pip install numexpr==2.6.1
-
 import sys
 from enum import Enum, IntEnum
 import array
-import inspect
-
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QFile
-
-
 from main import *
 from LoadPicture import *
 from PIL import Image
-import cv2
-import numpy as np
-import array
+import inspect
 
-#Ian's zero pending...bb
+
+
 class YUVFormat(IntEnum):
     YUYV_LE = 1
     UYVY_LE = 2
@@ -45,6 +38,7 @@ class RGBFormat(IntEnum):
     RGBP_BE = 18
 
 
+
 class _Parser:
     __DECODE_MAP = {
         #color:[bit per pixel, desc]
@@ -58,11 +52,15 @@ class _Parser:
     def getbpp(cls, color):
         return cls.__DECODE_MAP[color][0]
 
-#variable name
-#_variablename means protected things
-#So, if i want to use that, __variable /or/ another name
+
+    def getsize(self):
+        print('Total file size(bytes):', int(self._filesize_))
+        print('Current file size(bytes):', int(self._bufsize_))
+        print('Current file w*h:', int(self._bufsize_ / (self._bpp_ / 8)))
+
+
     def __init__(self, _filepath, _format, _imgwidth, _imgheight):
-        self._filepath_ = _filepath #__를 앞
+        self._filepath_ = _filepath
         self._format_ = _format
         self._imgwidth_ = _imgwidth
         self._imgheight_ = _imgheight
@@ -73,231 +71,196 @@ class _Parser:
 
 
     def decode(self, choice):
-        try:
-            width = self._imgwidth_
-            height = self._imgheight_
-            form = self._format_
-            filepath = self._filepath_
-            self._data_.update(choice)
+        """doc string"""
+        width = self._imgwidth_
+        height = self._imgheight_
+        form = self._format_
+        filepath = self._filepath_
+        self._data_.update(choice)
 
-            f_val = open(filepath, "rb")
+        f_val = open(filepath, "rb")
 
-            #will open the file for read mode (r) with binary I/O (b).
-
-            file = QFile(filepath)
-            self._filesize_ = file.size()  #f_size = w*h*bpp/3
+        file = QFile(filepath)
+        self._filesize_ = file.size()  #f_size = w*h*bpp/3
 
 
-            if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
-                image_out = self.YUV422(width, height, form, f_val)
+        if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
+            self._bpp_ = self.getbpp('YUV422')
+            self._bufsize_ = width * height * (self._bpp_ / 8)
+            image_out = self.YUV422(width, height, form, f_val)
 
-            elif(
-                    form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
-                    or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
-            ):
-                image_out = self.RGB3(width, height, form, f_val)
+        elif (
+                form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
+                or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
+        ):
+            self._bpp_ = self.getbpp('RGB3')
+            self._bufsize_ = width * height * (self._bpp_ / 8)
+            image_out = self.RGB3(width, height, form, f_val)
 
-            elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
-                image_out = self.XRGB(width, height, f_val)
+        elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
+            self._bpp_ = self.getbpp('XR24')
+            self._bufsize_ = width * height * (self._bpp_ / 8)
+            image_out = self.XRGB(width, height, f_val)
 
-            elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
-                image_out = self.RGBP(width, height, f_val)
+        elif form == RGBFormat.RGBP_LE or form == RGBFormat.RGBP_BE:
+            self._bpp_ = self.getbpp('RGBP')
+            self._bufsize_ = width * height * (self._bpp_ / 8)
+            image_out = self.RGBP(width, height, f_val)
 
-            data = image_out.tobytes('raw', "RGB")
-            qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
-            pixmap = QPixmap.fromImage(qim)
-            return pixmap
 
-        except FileNotFoundError:
-            pass
+        data = image_out.tobytes('raw', "RGB")
+        qim = QImage(data, image_out.size[0], image_out.size[1], QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(qim)
+        return pixmap
 
 
     def YUV422(self, width, height, form, f_uyvy):
-        #Each four bytes is two pixels.
-        #Each four bytes is two Y’s, a Cb and a Cr.
-        #Y goes to one of the pixels,
-        #and the Cb and Cr belong to both pixels. As you can see,
-        #the Cr and Cb components have half the horizontal resolution of the Y component.
+        self.getsize()
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
 
-        self._bpp_ = self.getbpp('YUV422')
-        self._bufsize_ = width * height * (self._bpp_ / 8)
+        for i in range(0, height):
+            for j in range(0, int(width/2)):
+                if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
+                    pix_y1 = ord(f_uyvy.read(1))
+                    pix_u = ord(f_uyvy.read(1))
+                    pix_y2 = ord(f_uyvy.read(1))
+                    pix_v = ord(f_uyvy.read(1))
+                elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
+                    pix_u = ord(f_uyvy.read(1))
+                    pix_y1 = ord(f_uyvy.read(1))
+                    pix_v = ord(f_uyvy.read(1))
+                    pix_y2 = ord(f_uyvy.read(1))
+                elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
+                    pix_y1 = ord(f_uyvy.read(1))
+                    pix_v = ord(f_uyvy.read(1))
+                    pix_y2 = ord(f_uyvy.read(1))
+                    pix_u = ord(f_uyvy.read(1))
+                elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
+                    pix_v = ord(f_uyvy.read(1))
+                    pix_y1 = ord(f_uyvy.read(1))
+                    pix_u = ord(f_uyvy.read(1))
+                    pix_y2 = ord(f_uyvy.read(1))
 
-        # Read entire file into YUV
-        im = np.fromfile(f_uyvy, dtype=np.uint8)
-        width = self._imgwidth_
-        height = self._imgheight_
-        wh = int(self._filesize_ / (self._bpp_ / 8))
-
-        if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
-            try:
-                Y1  = im[0::4]
-                U = im[1::4]
-                Y2  = im[2::4]
-                V = im[3::4]
-            except:
-                pass
-
-        elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
-            try:
-                U  = im[0::4]
-                Y1 = im[1::4]
-                V  = im[2::4]
-                Y2 = im[3::4]
-            except:
-                pass
-
-        elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
-            try:
-                Y1  = im[0::4]
-                V = im[1::4]
-                Y2  = im[2::4]
-                U = im[3::4]
-            except:
-                pass
-
-        elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
-            try:
-                V  = im[0::4]
-                Y1 = im[1::4]
-                U  = im[2::4]
-                Y2 = im[3::4]
-            except:
-                pass
-
-        #ValueError: ndarray is not C-contiguous
-        U = U.copy(order='C')
-        Y1 = Y1.copy(order='C')
-        V = V.copy(order='C')
-        Y2 = Y2.copy(order='C')
-
-        UV = np.zeros(wh, dtype=np.uint8)
-        YY = np.zeros(wh, dtype=np.uint8)
-
-        if self._data_ != {'y':1, 'u':1, 'v':1}:
-            Y1, Y2, U, V = self.choice_yuvval(Y1, Y2, U, V)
+                (
+                    pix_y1, pix_y2, pix_u, pix_v
+                ) = self.choice_yuvval(
+                    pix_y1, pix_y2, pix_u, pix_v
+                )
 
 
-        if(
-                form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE
-                or form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE
-        ):
-            UV[0::2] = np.fromstring(V, dtype=np.uint8)
-            UV[1::2] = np.fromstring(U, dtype=np.uint8)
-        elif(
-                form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE
-                or form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE
-        ):
-            UV[0::2] = np.fromstring(V, dtype=np.uint8)
-            UV[1::2] = np.fromstring(U, dtype=np.uint8)
+                red = 1.164 * (pix_y1-16) + 2.018 * (pix_u - 128)
+                green = 1.164 * (pix_y1-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
+                blue = 1.164 * (pix_y1-16) + 1.596 * (pix_v - 128)
+                pix[j*2, i] = int(blue), int(green), int(red)
 
-        YY[0::2] = np.fromstring(Y1, dtype=np.uint8)
-        YY[1::2] = np.fromstring(Y2, dtype=np.uint8)
+                red = 1.164 * (pix_y2-16) + 2.018 * (pix_u - 128)
+                green = 1.164 * (pix_y2-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
+                blue = 1.164 * (pix_y2-16) + 1.596 * (pix_v - 128)
+                pix[j*2+1, i] = int(blue), int(green), int(red)
 
-        #UV = UV.reshape(height, width)
-        #YY = YY.reshape(height, width)
-
-        yuv422 = cv2.merge([UV, YY])
-
-        bgr  = cv2.cvtColor(yuv422, cv2.COLOR_YUV2BGR_UYVY)
-        #Creates an image memory referencing pixel data in a byte buffer.
-        image_out = Image.frombuffer("RGB",[width, height], bgr, 'raw', 'RGB', 0, 1)
 
         return image_out
 
 
-    def choice_yuvval(self, y1, y2, u, v):
+    def choice_yuvval(self, _y1, _y2, _u, _v):
         if self._data_['y'] == 0:
-            y1[:] = 0
-            y2[:] = 0
+            _y1 = 16
+            _y2 = 16
         if self._data_['u'] == 0:
-            u[:] = 0
+            _u = 128
         if self._data_['v'] == 0:
-            v[:] = 0
-        return (y1, y2, u, v)
+            _v = 128
+        return (_y1, _y2, _u, _v)
+
 
 
     def RGB3(self, width, height, form, f_rgb):
-        self._bpp_ = self.getbpp('RGB3')
-        self._bufsize_ = width * height * (self._bpp_ / 8)
-        wh = int(self._filesize_ / (self._bpp_ / 8))
+        self.getsize()
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
 
-        im = np.fromfile(f_rgb, dtype=np.uint8)
-        #buf = np.zeros(wh, 3), dtype=np.uint8)
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                if form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE:
+                    pix_r = ord(f_rgb.read(1))
+                    pix_g = ord(f_rgb.read(1))
+                    pix_b = ord(f_rgb.read(1))
 
-        im = im.reshape(-1, 3)
-        #im = im.reshape(width, height, 3)
-        #data = np.asarray(im)
+                elif form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE:
+                    pix_b = ord(f_rgb.read(1))
+                    pix_g = ord(f_rgb.read(1))
+                    pix_r = ord(f_rgb.read(1))
 
-        if self._data_ != {'r':1, 'g':1, 'b':1}:
-            a = self.choice_val(im)
-            im = a
 
-        if form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE:
-            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
-        elif form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE:
-            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
+                (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
+
+                red = pix_r
+                green = pix_g
+                blue = pix_b
+
+                pix[j, i] = int(blue), int(green), int(red)
 
         return image_out
 
 
+
     def XRGB(self, width, height, f_rgb):
-        self._bpp_ = self.getbpp('XR24')
-        self._bufsize_ = width * height * (self._bpp_ / 8)
+        self.getsize()
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
 
-        im = np.fromfile(f_rgb, dtype=np.uint8)
-        im = im.reshape(-1, 4)
-        im = np.delete(im, 3, 1)
-        im = im.reshape(-1, 3)
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_b = ord(f_rgb.read(1))
+                pix_g = ord(f_rgb.read(1))
+                pix_r = ord(f_rgb.read(1))
+                pix_a = ord(f_rgb.read(1))
 
-        if self._data_ != {'r':1, 'g':1, 'b':1}:
-            a = self.choice_val(im)
-            im = a
+                (pix_b, pix_g, pix_r) = self.choice_rgbval(pix_b, pix_g, pix_r)
 
-        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
+                pix_a = 0
+                red = (pix_a * (pix_r / 255) + ((1 - pix_a) * (pix_r / 255))) * 255
+                green = (pix_a * (pix_g / 255) + ((1 - pix_a) * (pix_g / 255))) * 255
+                blue = (pix_a * (pix_b / 255) + ((1 - pix_a) * (pix_b / 255))) * 255
+
+                pix[j, i] = int(blue), int(green), int(red)
 
         return image_out
 
 
 
     def RGBP(self, width, height, f_rgb):
-        self._bpp_ = self.getbpp('RGBP')
-        self._bufsize_ = width * height * (self._bpp_ / 8)
+        self.getsize()
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
 
-        #RRRR RGGG GGGB BBBB
-        im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_h = ord(f_rgb.read(1))
+                pix_l = ord(f_rgb.read(1))
 
-        #alpha = 0xff
-        blue = ((im & 0xF800) >> 8) # (arr & 0xf800) >> 11; b << 3;
-        green = ((im & 0x07E0) << 5) # (arr & 0x07e0) >> 5; g  = g << 2; g << 8
-        red = ((im & 0x001F) << 19) # (arr & 0x001f); r << 3; r << 16
+                value = pix_l*256 + pix_h
 
-        if self._data_ != {'r':1, 'g':1, 'b':1}:
-            if self._data_['r'] == 0:
-                red = 0
-            elif self._data_['g'] == 0:
-                green = 0
-            elif self._data_['b'] == 0:
-                blue = 0
+                red = (value & 0xF800) >> 8
+                green = (value & 0x7E0) >> 3
+                blue = (value & 0x1F) << 3
 
-        im = 0xFF000000 + blue + green + red
+                (blue, green, red) = self.choice_rgbval(blue, green, red)
 
-        image_out = Image.frombuffer("RGBA",[width, height], im, 'raw','RGBA', 0, 1)
+                pix[j, i] = int(blue), int(green), int(red)
+
 
         return image_out
 
 
-    def choice_val(self, im):
+
+    def choice_rgbval(self, pix_b, pix_g, pix_r):
+        if self._data_['b'] == 0:
+            pix_r = 0
+        if self._data_['g'] == 0:
+            pix_g = 0
         if self._data_['r'] == 0:
-            im = np.delete(im, 0, 1)
-            im = np.insert(im, 0, 0, 1)
-        elif self._data_['g'] == 0:
-            im = np.delete(im, 1, 1)
-            im = np.insert(im, 1, 0, 1)
-        elif self._data_['r'] == 0:
-            im = np.delete(im, 2, 1)
-            im = np.insert(im, 2, 0, 1)
-        return im
+            pix_b = 0
 
-
-    def send(self):
-        return self._filesize_, self._bufsize_, self._bpp_
+        return (pix_b, pix_g, pix_r)
