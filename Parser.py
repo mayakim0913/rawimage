@@ -219,13 +219,14 @@ class _Parser:
     def RGB3(self, width, height, form, f_rgb):
         self._bpp_ = self.getbpp('RGB3')
         self._bufsize_ = width * height * (self._bpp_ / 8)
+        wh = int(self._filesize_ / (self._bpp_ / 8))
 
         im = np.fromfile(f_rgb, dtype=np.uint8)
-        #buf = numpy.zeros((width, height, 1), dtype=numpy.uint8)
+        #buf = np.zeros(wh, 3), dtype=np.uint8)
 
         im = im.reshape(-1, 3)
         #im = im.reshape(width, height, 3)
-        data = np.asarray(im)
+        #data = np.asarray(im)
 
         if self._data_ != {'r':1, 'g':1, 'b':1}:
             a = self.choice_val(im)
