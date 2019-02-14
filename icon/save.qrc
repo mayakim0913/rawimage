@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="save">
-    <file>save.qrc</file>
-    <file>save.png</file>
-  </qresource>
-</RCC>
