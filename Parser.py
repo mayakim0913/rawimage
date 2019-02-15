@@ -240,7 +240,7 @@ class _Parser:
         return image_out
 
 
-    def BGR3(self, width, height, form, f_rgb):
+    def BGB3(self, width, height, form, f_rgb):
         self._bpp_ = self.getbpp('RGB3')
         self._bufsize_ = width * height * (self._bpp_ / 8)
         wh = int(self._filesize_ / (self._bpp_ / 8))
