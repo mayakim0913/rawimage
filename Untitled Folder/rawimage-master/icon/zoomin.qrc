@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="zoomin">
-    <file>zoomin.qrc</file>
-    <file>zoomin.png</file>
-  </qresource>
-</RCC>

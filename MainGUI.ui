@@ -59,6 +59,35 @@
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="tab_5">
+          <attribute name="title">
+           <string>Auto</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="0">
+            <widget class="QScrollArea" name="scrollArea">
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>545</width>
+                <height>587</height>
+               </rect>
+              </property>
+              <layout class="QGridLayout" name="gridLayout">
+               <item row="0" column="0">
+                <widget class="QMdiArea" name="mdiArea"/>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
          <widget class="QWidget" name="tab">
           <attribute name="title">
            <string>Hex</string>
@@ -85,35 +114,6 @@
                   <string/>
                  </property>
                 </widget>
-               </item>
-              </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="tab_5">
-          <attribute name="title">
-           <string>Auto</string>
-          </attribute>
-          <layout class="QGridLayout" name="gridLayout_8">
-           <item row="0" column="0">
-            <widget class="QScrollArea" name="scrollArea">
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>545</width>
-                <height>587</height>
-               </rect>
-              </property>
-              <layout class="QGridLayout" name="gridLayout">
-               <item row="0" column="0">
-                <widget class="QMdiArea" name="mdiArea"/>
                </item>
               </layout>
              </widget>
@@ -286,6 +286,13 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QCheckBox" name="checkBox">
+                <property name="text">
+                 <string>A</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
            </layout>
@@ -335,11 +342,17 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
-               <widget class="QCheckBox" name="checkbox__a_yuv">
-                <property name="text">
-                 <string>A</string>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-               </widget>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
               <item>
                <widget class="QCheckBox" name="checkbox_swap">
@@ -358,14 +371,14 @@
            <item>
             <widget class="QPushButton" name="auto_btn">
              <property name="text">
-              <string>AutoDetection</string>
+              <string>Auto Detection</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="hex_btn">
              <property name="text">
-              <string>Hex button</string>
+              <string>Hex Mode</string>
              </property>
             </widget>
            </item>
@@ -460,7 +473,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>346</width>
-                 <height>139</height>
+                 <height>138</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gridLayout_15">

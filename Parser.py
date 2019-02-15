@@ -7,7 +7,6 @@
 
 import sys
 from enum import Enum, IntEnum
-import array
 import inspect
 
 from PyQt5.QtGui import QImage, QPixmap
@@ -19,7 +18,6 @@ from LoadPicture import *
 from PIL import Image
 import cv2
 import numpy as np
-import array
 
 #Ian's zero pending...bb
 class YUVFormat(IntEnum):

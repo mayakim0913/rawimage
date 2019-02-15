@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="zoomout">
-    <file>zoomout.qrc</file>
-    <file>zoomout.png</file>
-  </qresource>
-</RCC>
