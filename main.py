@@ -257,6 +257,7 @@ class MainWindow(QMainWindow):
         self.checkbox_state()
         self.match_format()
 
+
     def onStart(self):
         self.pg.setRange(0,0)
         self.myLongTask.start()
