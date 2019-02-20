@@ -288,7 +288,7 @@ class _Parser:
                 except:
                     pass
 
-                pix[j, i] = pix_r, pix_g, pix_b
+                pix[j, i] = int(blue), int(green), int(red)
 
         return image_out
 
