@@ -7,7 +7,7 @@ Form implementation is generated from reading ui file 'MainGUI.ui' by Qt designe
 The program based on **Python**, and uses OpenCV, Numpy, Pillow libraries (tested on 3.7.0).
 
 ## Features
-> It can disply **the binary raw file** in graphical mode and in Hex mode using Qt ui. 
+> It can disply the binary raw file in graphical mode and in Hex mode using Qt ui. 
 * Graphic mode: Generall image viewer mode
 * Auto mode: Display raw files in all color formats
 * Hex mode: Display raw files as Hex mode
@@ -86,4 +86,6 @@ $ python main.py
 
 ## Limitation
 * Hex Viewer Slow
-* Exception not all processed
+* try - Exception not all processed
+* not to be load for large size than original file w*h size
+* "swap" doen't work
