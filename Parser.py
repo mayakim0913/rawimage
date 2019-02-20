@@ -282,13 +282,12 @@ class _Parser:
 
         for i in range(0, height):
             for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = pix_a = 0
+                pix_r = pix_g = pix_b = 0
                 try:
-                    pix_r, pix_g, pix_b = (b for b in f_rgb.read(3))
+                    pix_b, pix_g, pix_r = (b for b in fh.read(3))
                 except:
                     pass
-
-                pix[j, i] = int(blue), int(green), int(red)
+                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
 
@@ -316,7 +315,21 @@ class _Parser:
 
         im = 0xFF000000 + blue + green + red
 
-        image_out = Image.frombuffer("RGBA",[width, height], im, 'raw','RGBA', 0, 1)
+        im.tofile("changed_file.bin")
+        fh = open("changed_file.bin", "rb")
+
+        image_out = Image.new("RGB", (width, height), (0,0,0))
+        pix = image_out.load()
+
+        for i in range(0, height):
+            for j in range(0, int(width)):
+                pix_r = pix_g = pix_b = pix_a = 0
+                try:
+                    pix_b, pix_g, pix_r, pix_a = (b for b in fh.read(4))
+                except:
+                    pass
+
+                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
 
