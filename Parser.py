@@ -19,7 +19,7 @@ from PIL import Image
 import cv2
 import numpy as np
 
-#Ian's zero pending...bb
+
 class YUVFormat(IntEnum):
     YUYV_LE = 1
     UYVY_LE = 2
@@ -56,9 +56,7 @@ class _Parser:
     def getbpp(cls, color):
         return cls.__DECODE_MAP[color][0]
 
-#variable name
-#_variablename means protected things
-#So, if i want to use that, __variable /or/ another name
+
     def __init__(self, _filepath, _format, _imgwidth, _imgheight):
         self._filepath_ = _filepath #__를 앞
         self._format_ = _format
@@ -79,7 +77,6 @@ class _Parser:
             self._data_.update(choice)
 
             f_val = open(filepath, "rb")
-
             #will open the file for read mode (r) with binary I/O (b).
 
             file = QFile(filepath)
@@ -122,12 +119,12 @@ class _Parser:
 
         # Read entire file into YUV
         im = np.fromfile(f_uyvy, dtype=np.uint8)
-        #width = 1920
-        #height = 1080
-        #wh = width * height
-        width = self._imgwidth_
-        height = self._imgheight_
-        wh = int(self._filesize_ / (self._bpp_ / 8))
+        width = 1920
+        height = 1080
+        wh = width * height
+        #width = self._imgwidth_
+        #height = self._imgheight_
+        #wh = int(self._filesize_ / (self._bpp_ / 8))
 
         if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
             try:
@@ -171,10 +168,11 @@ class _Parser:
         V = V.copy(order='C')
         Y2 = Y2.copy(order='C')
 
-        UV = np.zeros(wh, dtype=np.uint8)
-        YY = np.zeros(wh, dtype=np.uint8)
+        UV = np.empty(wh, dtype=np.uint8)
+        YY = np.empty(wh, dtype=np.uint8)
 
         if self._data_ != {'y':1, 'u':1, 'v':1}:
+            print("hi")
             Y1, Y2, U, V = self.choice_yuvval(Y1, Y2, U, V)
 
         if(
@@ -193,8 +191,11 @@ class _Parser:
         YY[0::2] = np.fromstring(Y1, dtype=np.uint8)
         YY[1::2] = np.fromstring(Y2, dtype=np.uint8)
 
-        #UV = UV.reshape(height, width)
-        #YY = YY.reshape(height, width)
+        UV = UV.reshape(height, width)
+        YY = YY.reshape(height, width)
+
+        #UV = UV.reshape(-1, 3)
+        #YY = YY.reshape(-1, 3)
 
         yuv422 = cv2.merge([UV, YY])
 
