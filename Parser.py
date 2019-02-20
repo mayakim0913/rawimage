@@ -3,7 +3,6 @@
 #pylint:disble = missing-docstring
 #pylint:disable = no-name-in-module
 
-#pip install numexpr==2.6.1
 
 import sys
 from enum import Enum, IntEnum
