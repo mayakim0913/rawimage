@@ -123,13 +123,15 @@ class MainWindow(QMainWindow):
         self.actionAbout.setIcon(icon_about)
         self.actionExit.setIcon(icon_exit)
 
-#TO P part!
+
     def connect_action(self):
         self.actionOpen.triggered.connect(self.open_dialog)
         self.actionSave_As.triggered.connect(self.save_dialog)
         self.actionExit.triggered.connect(qApp.quit)
         self.actionZoom_in.triggered.connect(self.zoom_in)
         self.actionZoom_out.triggered.connect(self.zoom_out)
+        self.actionHelp.triggered.connect(self.help)
+        self.actionAbout.triggered.connect(self.about)
 
         self.comb_format.currentIndexChanged.connect(self.set_format)
 
@@ -333,27 +335,6 @@ class MainWindow(QMainWindow):
 
         except TypeError:
             pass
-
-    def information(self):
-        size, buf, bpp = self.pa.send()
-
-        info = []
-
-        info.append(('Filename: %s') % (self.filepath))
-        info.append(('Format (in): %d') % (self._format))
-        info.append(("Image Width: %d") % (self.imgwidth))
-        info.append(("Image Height: %d") % (self.imgheight))
-
-        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
-        info.append((" - Filesize (bytes): %d") % (int(size)))
-        info.append((' - File w*h: %d') % (int(size / (bpp / 8))))
-        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
-        info.append((' - Want to read file size(bytes): %d') % (int(buf)))
-        info.append((' - Want to read file w*h: %d') % (int(buf / (bpp / 8))))
-
-        _info = '\n'.join(info)
-
-        self.label_info.setText(_info)
 
 
     def swap_format(self):
@@ -614,6 +595,37 @@ class MainWindow(QMainWindow):
         except AttributeError:
             pass
 
+
+    def help(self):
+        w = QWidget()
+        QMessageBox.information(w, "Help", "If you need any help, Please visit GitHub or mail to me \n E-mail: maya.kim@intel.com \n GitHub: https://github.com/mayakim0913/rawimage")
+
+
+    def about(self):
+        w = QWidget()
+        QMessageBox.information(w, "About", "It loads Raw image files on Qt ui display and converts it to color format(YUV422, RGB888, RGB565, RGBA) and save to compression image format(JPEG, PNG)")
+
+
+    def information(self):
+        size, buf, bpp = self.pa.send()
+
+        info = []
+
+        info.append(('Filename: %s') % (self.filepath))
+        info.append(('Format (in): %d') % (self._format))
+        info.append(("Image Width: %d") % (self.imgwidth))
+        info.append(("Image Height: %d") % (self.imgheight))
+
+        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
+        info.append((" - Filesize (bytes): %d") % (int(size)))
+        info.append((' - File w*h: %d') % (int(size / (bpp / 8))))
+        info.append(('BPP (bytes): %d') % (int(bpp / 8)))
+        info.append((' - Want to read file size(bytes): %d') % (int(buf)))
+        info.append((' - Want to read file w*h: %d') % (int(buf / (bpp / 8))))
+
+        _info = '\n'.join(info)
+
+        self.label_info.setText(_info)
 
 
 
