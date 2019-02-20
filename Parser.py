@@ -7,7 +7,6 @@
 
 import sys
 from enum import Enum, IntEnum
-import array
 import inspect
 
 from PyQt5.QtGui import QImage, QPixmap
@@ -19,7 +18,6 @@ from LoadPicture import *
 from PIL import Image
 import cv2
 import numpy as np
-import array
 
 #Ian's zero pending...bb
 class YUVFormat(IntEnum):
@@ -91,11 +89,11 @@ class _Parser:
             if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
                 image_out = self.YUV422(width, height, form, f_val)
 
-            elif(
-                    form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE
-                    or form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE
-            ):
+            elif form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE:
                 image_out = self.RGB3(width, height, form, f_val)
+
+            elif form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE:
+                image_out = self.BGB3(width, height, form, f_val)
 
             elif form == RGBFormat.XR24_LE or form == RGBFormat.XR24_BE:
                 image_out = self.XRGB(width, height, f_val)
@@ -124,6 +122,9 @@ class _Parser:
 
         # Read entire file into YUV
         im = np.fromfile(f_uyvy, dtype=np.uint8)
+        #width = 1920
+        #height = 1080
+        #wh = width * height
         width = self._imgwidth_
         height = self._imgheight_
         wh = int(self._filesize_ / (self._bpp_ / 8))
@@ -176,7 +177,6 @@ class _Parser:
         if self._data_ != {'y':1, 'u':1, 'v':1}:
             Y1, Y2, U, V = self.choice_yuvval(Y1, Y2, U, V)
 
-
         if(
                 form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE
                 or form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE
@@ -199,6 +199,7 @@ class _Parser:
         yuv422 = cv2.merge([UV, YY])
 
         bgr  = cv2.cvtColor(yuv422, cv2.COLOR_YUV2BGR_UYVY)
+
         #Creates an image memory referencing pixel data in a byte buffer.
         image_out = Image.frombuffer("RGB",[width, height], bgr, 'raw', 'RGB', 0, 1)
 
@@ -232,10 +233,39 @@ class _Parser:
             a = self.choice_val(im)
             im = a
 
-        if form == RGBFormat.BGR3_LE or form == RGBFormat.BGR3_BE:
-            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
-        elif form == RGBFormat.RGB3_LE or form == RGBFormat.RGB3_BE:
-            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
+        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
+
+        return image_out
+
+
+    def BGB3(self, width, height, form, f_rgb):
+        self._bpp_ = self.getbpp('RGB3')
+        self._bufsize_ = width * height * (self._bpp_ / 8)
+        wh = int(self._filesize_ / (self._bpp_ / 8))
+
+        im = np.fromfile(f_rgb, dtype=np.uint8)
+        #buf = np.zeros(wh, 3), dtype=np.uint8)
+
+        im = im.reshape(-1, 3)
+        #im = im.reshape(width, height, 3)
+        #data = np.asarray(im)
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            a = self.choice_val(im)
+            im = a
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            if self._data_['b'] == 0:
+                im = np.delete(im, 0, 1)
+                im = np.insert(im, 0, 0, 1)
+            if self._data_['g'] == 0:
+                im = np.delete(im, 1, 1)
+                im = np.insert(im, 1, 0, 1)
+            if self._data_['r'] == 0:
+                im = np.delete(im, 2, 1)
+                im = np.insert(im, 2, 0, 1)
+
+        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
 
         return image_out
 
@@ -267,16 +297,16 @@ class _Parser:
         im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
 
         #alpha = 0xff
-        blue = ((im & 0xF800) >> 8) # (arr & 0xf800) >> 11; b << 3;
+        red = ((im & 0xF800) >> 8) # (arr & 0xf800) >> 11; b << 3;
         green = ((im & 0x07E0) << 5) # (arr & 0x07e0) >> 5; g  = g << 2; g << 8
-        red = ((im & 0x001F) << 19) # (arr & 0x001f); r << 3; r << 16
+        blue = ((im & 0x001F) << 19) # (arr & 0x001f); r << 3; r << 16
 
         if self._data_ != {'r':1, 'g':1, 'b':1}:
             if self._data_['r'] == 0:
                 red = 0
-            elif self._data_['g'] == 0:
+            if self._data_['g'] == 0:
                 green = 0
-            elif self._data_['b'] == 0:
+            if self._data_['b'] == 0:
                 blue = 0
 
         im = 0xFF000000 + blue + green + red
@@ -290,10 +320,10 @@ class _Parser:
         if self._data_['r'] == 0:
             im = np.delete(im, 0, 1)
             im = np.insert(im, 0, 0, 1)
-        elif self._data_['g'] == 0:
+        if self._data_['g'] == 0:
             im = np.delete(im, 1, 1)
             im = np.insert(im, 1, 0, 1)
-        elif self._data_['r'] == 0:
+        if self._data_['b'] == 0:
             im = np.delete(im, 2, 1)
             im = np.insert(im, 2, 0, 1)
         return im
