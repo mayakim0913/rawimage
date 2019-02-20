@@ -184,7 +184,6 @@ class _Parser:
         return (_y1, _y2, _u, _v)
 
 
-
     def RGB3(self, width, height, form, f_rgb):
         self._bpp_ = self.getbpp('RGB3')
         self._bufsize_ = width * height * (self._bpp_ / 8)
