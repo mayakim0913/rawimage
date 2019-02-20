@@ -19,7 +19,6 @@ from PIL import Image
 import cv2
 import numpy as np
 
-
 class YUVFormat(IntEnum):
     YUYV_LE = 1
     UYVY_LE = 2
@@ -56,7 +55,9 @@ class _Parser:
     def getbpp(cls, color):
         return cls.__DECODE_MAP[color][0]
 
-
+#variable name
+#_variablename means protected things
+#So, if i want to use that, __variable /or/ another name
     def __init__(self, _filepath, _format, _imgwidth, _imgheight):
         self._filepath_ = _filepath #__를 앞
         self._format_ = _format
@@ -77,6 +78,7 @@ class _Parser:
             self._data_.update(choice)
 
             f_val = open(filepath, "rb")
+
             #will open the file for read mode (r) with binary I/O (b).
 
             file = QFile(filepath)
@@ -110,9 +112,6 @@ class _Parser:
     def YUV422(self, width, height, form, f_uyvy):
         #Each four bytes is two pixels.
         #Each four bytes is two Y’s, a Cb and a Cr.
-
-        #[Y0 U0 V1] [Y1 U0 V1] [Y2 U2 V3] [Y3 U2 V3]
-
         #Y goes to one of the pixels,
         #and the Cb and Cr belong to both pixels. As you can see,
         #the Cr and Cb components have half the horizontal resolution of the Y component.
@@ -120,68 +119,101 @@ class _Parser:
         self._bpp_ = self.getbpp('YUV422')
         self._bufsize_ = width * height * (self._bpp_ / 8)
 
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
+        # Read entire file into YUV
+        im = np.fromfile(f_uyvy, dtype=np.uint8)
+        #width = 1920
+        #height = 1080
+        #wh = width * height
+        width = self._imgwidth_
+        height = self._imgheight_
+        wh = int(self._filesize_ / (self._bpp_ / 8))
 
+        if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
+            try:
+                Y1  = im[0::4]
+                U = im[1::4]
+                Y2  = im[2::4]
+                V = im[3::4]
+            except:
+                pass
 
-        for i in range(0, height):
-            for j in range(0, int(width/2)):
-                pix_y1 = pix_u = pix_y2 = pix_v = 0
+        elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
+            try:
+                U  = im[0::4]
+                Y1 = im[1::4]
+                V  = im[2::4]
+                Y2 = im[3::4]
+            except:
+                pass
 
-                if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
-                    try:
-                        pix_y1, pix_u, pix_y2, pix_v = (b for b in f_uyvy.read(4))
-                    except:
-                        pass
+        elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
+            try:
+                Y1  = im[0::4]
+                V = im[1::4]
+                Y2  = im[2::4]
+                U = im[3::4]
+            except:
+                pass
 
-                elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
-                    try:
-                        pix_u, pix_y1, pix_v, pix_y2 = (b for b in f_uyvy.read(4))
-                    except:
-                        pass
+        elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
+            try:
+                V  = im[0::4]
+                Y1 = im[1::4]
+                U  = im[2::4]
+                Y2 = im[3::4]
+            except:
+                pass
 
-                elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
-                    try:
-                        pix_y1, pix_v, pix_y2, pix_u = (b for b in f_uyvy.read(4))
-                    except:
-                        pass
+        #ValueError: ndarray is not C-contiguous
+        U = U.copy(order='C')
+        Y1 = Y1.copy(order='C')
+        V = V.copy(order='C')
+        Y2 = Y2.copy(order='C')
 
-                elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
-                    try:
-                        pix_v, pix_y1, pix_u, pix_y2 = (b for b in f_uyvy.read(4))
-                    except:
-                        pass
+        UV = np.zeros(wh, dtype=np.uint8)
+        YY = np.zeros(wh, dtype=np.uint8)
 
-                (
-                    pix_y1, pix_y2, pix_u, pix_v
-                ) = self.choice_yuvval(
-                    pix_y1, pix_y2, pix_u, pix_v
-                )
+        if self._data_ != {'y':1, 'u':1, 'v':1}:
+            Y1, Y2, U, V = self.choice_yuvval(Y1, Y2, U, V)
 
+        if(
+                form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE
+                or form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE
+        ):
+            UV[0::2] = np.fromstring(V, dtype=np.uint8)
+            UV[1::2] = np.fromstring(U, dtype=np.uint8)
+        elif(
+                form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE
+                or form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE
+        ):
+            UV[0::2] = np.fromstring(V, dtype=np.uint8)
+            UV[1::2] = np.fromstring(U, dtype=np.uint8)
 
-                red = 1.164 * (pix_y1-16) + 2.018 * (pix_u - 128)
-                green = 1.164 * (pix_y1-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
-                blue = 1.164 * (pix_y1-16) + 1.596 * (pix_v - 128)
-                pix[j*2, i] = int(blue), int(green), int(red)
+        YY[0::2] = np.fromstring(Y1, dtype=np.uint8)
+        YY[1::2] = np.fromstring(Y2, dtype=np.uint8)
 
-                red = 1.164 * (pix_y2-16) + 2.018 * (pix_u - 128)
-                green = 1.164 * (pix_y2-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
-                blue = 1.164 * (pix_y2-16) + 1.596 * (pix_v - 128)
-                pix[j*2+1, i] = int(blue), int(green), int(red)
+        #UV = UV.reshape(height, width)
+        #YY = YY.reshape(height, width)
 
+        yuv422 = cv2.merge([UV, YY])
+
+        bgr  = cv2.cvtColor(yuv422, cv2.COLOR_YUV2BGR_UYVY)
+
+        #Creates an image memory referencing pixel data in a byte buffer.
+        image_out = Image.frombuffer("RGB",[width, height], bgr, 'raw', 'RGB', 0, 1)
 
         return image_out
 
 
-    def choice_yuvval(self, _y1, _y2, _u, _v):
+    def choice_yuvval(self, y1, y2, u, v):
         if self._data_['y'] == 0:
-            _y1 = 16
-            _y2 = 16
+            y1[:] = 0
+            y2[:] = 0
         if self._data_['u'] == 0:
-            _u = 128
+            u[:] = 0
         if self._data_['v'] == 0:
-            _v = 128
-        return (_y1, _y2, _u, _v)
+            v[:] = 0
+        return (y1, y2, u, v)
 
 
     def RGB3(self, width, height, form, f_rgb):
@@ -190,27 +222,17 @@ class _Parser:
         wh = int(self._filesize_ / (self._bpp_ / 8))
 
         im = np.fromfile(f_rgb, dtype=np.uint8)
+        #buf = np.zeros(wh, 3), dtype=np.uint8)
 
         im = im.reshape(-1, 3)
+        #im = im.reshape(width, height, 3)
+        #data = np.asarray(im)
 
         if self._data_ != {'r':1, 'g':1, 'b':1}:
             a = self.choice_val(im)
             im = a
 
-        im.tofile("changed_file.bin")
-        fh = open("changed_file.bin", "rb")
-
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
-
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = 0
-                try:
-                    pix_b, pix_g, pix_r = (b for b in fh.read(3))
-                except:
-                    pass
-                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
 
         return image_out
 
@@ -242,20 +264,7 @@ class _Parser:
                 im = np.delete(im, 2, 1)
                 im = np.insert(im, 2, 0, 1)
 
-        im.tofile("changed_file.bin")
-        fh = open("changed_file.bin", "rb")
-
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
-
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = 0
-                try:
-                    pix_r, pix_g, pix_b = (b for b in fh.read(3))
-                except:
-                    pass
-                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
 
         return image_out
 
@@ -273,20 +282,7 @@ class _Parser:
             a = self.choice_val(im)
             im = a
 
-        im.tofile("changed_file.bin")
-        fh = open("changed_file.bin", "rb")
-
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
-
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = 0
-                try:
-                    pix_b, pix_g, pix_r = (b for b in fh.read(3))
-                except:
-                    pass
-                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+        image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
 
         return image_out
 
@@ -314,21 +310,7 @@ class _Parser:
 
         im = 0xFF000000 + blue + green + red
 
-        im.tofile("changed_file.bin")
-        fh = open("changed_file.bin", "rb")
-
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
-
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = pix_a = 0
-                try:
-                    pix_b, pix_g, pix_r, pix_a = (b for b in fh.read(4))
-                except:
-                    pass
-
-                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+        image_out = Image.frombuffer("RGBA",[width, height], im, 'raw','RGBA', 0, 1)
 
         return image_out
 
@@ -349,206 +331,3 @@ class _Parser:
     def send(self):
         return self._filesize_, self._bufsize_, self._bpp_
 
-
-"""
-    def YUV422(self, width, height, form, f_uyvy):
-        #Each four bytes is two pixels.
-        #Each four bytes is two Y’s, a Cb and a Cr.
-        #Y goes to one of the pixels,
-        #and the Cb and Cr belong to both pixels. As you can see,
-        #the Cr and Cb components have half the horizontal resolution of the Y component.
-
-        self._bpp_ = self.getbpp('YUV422')
-        self._bufsize_ = width * height * (self._bpp_ / 8)
-
-        # Read entire file into YUV
-        im = np.fromfile(f_uyvy, dtype=np.uint8)
-        width = 1920
-        height = 1080
-        wh = width * height
-        #width = self._imgwidth_
-        #height = self._imgheight_
-        #wh = int(self._filesize_ / (self._bpp_ / 8))
-
-        if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
-            try:
-                Y1  = im[0::4]
-                U = im[1::4]
-                Y2  = im[2::4]
-                V = im[3::4]
-            except:
-                pass
-
-        elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
-            try:
-                U  = im[0::4]
-                Y1 = im[1::4]
-                V  = im[2::4]
-                Y2 = im[3::4]
-            except:
-
-                pass
-
-        elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
-            try:
-                Y1  = im[0::4]
-                V = im[1::4]
-                Y2  = im[2::4]
-                U = im[3::4]
-            except:
-                pass
-
-        elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
-            try:
-                V  = im[0::4]
-                Y1 = im[1::4]
-                U  = im[2::4]
-                Y2 = im[3::4]
-            except:
-                pass
-
-        #ValueError: ndarray is not C-contiguous
-        U = U.copy(order='C')
-        Y1 = Y1.copy(order='C')
-        V = V.copy(order='C')
-        Y2 = Y2.copy(order='C')
-
-        UV = np.empty(wh, dtype=np.uint8)
-        YY = np.empty(wh, dtype=np.uint8)
-
-        if self._data_ != {'y':1, 'u':1, 'v':1}:
-            print("hi")
-            Y1, Y2, U, V = self.choice_yuvval(Y1, Y2, U, V)
-
-        if(
-                form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE
-                or form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE
-        ):
-            UV[0::2] = np.fromstring(V, dtype=np.uint8)
-            UV[1::2] = np.fromstring(U, dtype=np.uint8)
-        elif(
-                form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE
-                or form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE
-        ):
-            UV[0::2] = np.fromstring(V, dtype=np.uint8)
-            UV[1::2] = np.fromstring(U, dtype=np.uint8)
-
-        YY[0::2] = np.fromstring(Y1, dtype=np.uint8)
-        YY[1::2] = np.fromstring(Y2, dtype=np.uint8)
-
-        UV = UV.reshape(height, width)
-        YY = YY.reshape(height, width)
-
-        #UV = UV.reshape(-1, 3)
-        #YY = YY.reshape(-1, 3)
-
-        yuv422 = cv2.merge([UV, YY])
-
-        bgr  = cv2.cvtColor(yuv422, cv2.COLOR_YUV2BGR_UYVY)
-
-        #Creates an image memory referencing pixel data in a byte buffer.
-        image_out = Image.frombuffer("RGB",[width, height], bgr, 'raw', 'RGB', 0, 1)
-
-        return image_out
-
-
-    def choice_yuvval(self, y1, y2, u, v):
-        if self._data_['y'] == 0:
-            y1[:] = 0
-            y2[:] = 0
-        if self._data_['u'] == 0:
-            u[:] = 0
-        if self._data_['v'] == 0:
-            v[:] = 0
-        return (y1, y2, u, v)
-
-
-
-"""
-"""
-
-    def YUV422(self, width, height, form, f_uyvy):
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
-
-        self._bpp_ = self.getbpp('YUV422')
-        self._bufsize_ = width * height * (self._bpp_ / 8)
-        raw_buf = []
-        rem = self._bufsize_
-
-        while rem != 0:
-            s = f_uyvy.read(rem)
-            raw_buf += s
-            rem -= len(s)
-
-        for i in range(self._bufsize_):
-            raw_buf[i] = ord(raw_buf[i])
-
-        u_baseoffset = 0
-        y_baseoffset = u_baseoffset + 1
-        v_baseoffset = y_baseoffset + 1
-
-        row_step = height * (self._bpp_/8) #bytes per row
-
-
-        for i in range(0, height):
-            for j in range(0, int(width/2)):
-                pix_y1 = pix_u = pix_y2 = pix_v = 0
-
-                if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
-                    try:
-                        pix_y1, pix_u, pix_y2, pix_v = (b for b in f_uyvy.read(4))
-                    except:
-                        pass
-
-                elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
-                    try:
-                        pix_u, pix_y1, pix_v, pix_y2 = (b for b in f_uyvy.read(4))
-                    except:
-                        pass
-
-                elif form == YUVFormat.YVYU_LE or form == YUVFormat.YVYU_BE:
-                    try:
-                        pix_y1, pix_v, pix_y2, pix_u = (b for b in f_uyvy.read(4))
-                    except:
-                        pass
-
-                elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
-                    try:
-                        pix_v, pix_y1, pix_u, pix_y2 = (b for b in f_uyvy.read(4))
-                    except:
-                        pass
-
-                (
-                    pix_y1, pix_y2, pix_u, pix_v
-                ) = self.choice_yuvval(
-                    pix_y1, pix_y2, pix_u, pix_v
-                )
-
-
-                red = 1.164 * (pix_y1-16) + 2.018 * (pix_u - 128)
-                green = 1.164 * (pix_y1-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
-                blue = 1.164 * (pix_y1-16) + 1.596 * (pix_v - 128)
-                pix[j*2, i] = int(blue), int(green), int(red)
-
-                red = 1.164 * (pix_y2-16) + 2.018 * (pix_u - 128)
-                green = 1.164 * (pix_y2-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
-                blue = 1.164 * (pix_y2-16) + 1.596 * (pix_v - 128)
-                pix[j*2+1, i] = int(blue), int(green), int(red)
-
-
-        return image_out
-
-
-    def choice_yuvval(self, _y1, _y2, _u, _v):
-        if self._data_['y'] == 0:
-            _y1 = 16
-            _y2 = 16
-        if self._data_['u'] == 0:
-            _u = 128
-        if self._data_['v'] == 0:
-            _v = 128
-        return (_y1, _y2, _u, _v)
-
-
-"""
