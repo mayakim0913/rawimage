@@ -7,7 +7,7 @@ Form implementation is generated from reading ui file 'MainGUI.ui' by Qt designe
 The program based on **Python**, and uses OpenCV, Numpy, Pillow libraries (tested on 3.7.0).
 
 ## Features
-> It can disply the binary raw file in graphical mode and in Hex mode using Qt ui. 
+> It can disply the binary raw file in graphical mode and in Hex mode using Qt ui.
 * Graphic mode: Generall image viewer mode
 * Auto mode: Display raw files in all color formats
 * Hex mode: Display raw files as Hex mode
@@ -16,14 +16,14 @@ The program based on **Python**, and uses OpenCV, Numpy, Pillow libraries (teste
 > You can save the checked file as compression image format (jpeg, png).
 
 ## Structure
-### Application structure
-![alt text](https://github.com/mayakim0913/rawimage/tree/ongoing/outline/Slide1.PNG)
+* **Application structure**
+![Image_Info](./outline/Slide1.PNG)
 
-### Examples
-![alt text](https://github.com/mayakim0913/rawimage/tree/ongoing/outline/Slide2.PNG)
+* **Examples**
+![Image_Info](./outline/Slide2.PNG)
 
 
-## File Structure
+* **File Structure**
 ```ruby
 rawimage/
 ├── icon              (Application ui icon)
@@ -38,14 +38,7 @@ rawimage/
 ├── MainGUI.py        (Coversion file from .ui to .py)
 ├── main.py           (Main function)
 ├── Parser.py         (Parsing to other color spaces)
-├── LoadPicture.py    (Load sub windows for automaically showing all color spaces)
-├── open.png
-├── about.png
-├── exit.png
-├── help.png
-├── save.png
-├── zoomin.png
-└── zoomout.png
+└── LoadPicture.py    (Load sub windows for automaically showing all color spaces)
 ```
 
 ## Ingredients
@@ -76,7 +69,7 @@ $ pip install times pytest-timeit Pillow enum PyQt5 opencv-python numpy
 $ python main.py
 ```
 
-3) Key board support
+**3) Key board support**
 * Ctrl + O: Show the file dialog to select the raw image file
 * Ctrl + O: Show the file dialog to save the raw image file
 * Ctrl ++: Zoom in to +0.1
@@ -84,8 +77,18 @@ $ python main.py
 * Ctrl + i: Show the application information
 * Ctrl + q: Quik the Application
 
+
+**4) Default Feature**
+* Color format: YUYV
+* Width * Height: 400 * 400
+* Console: print out time consumption
+
+
 ## Limitation
 * Hex Viewer Slow
 * try - Exception not all processed
 * not to be load for large size than original file w*h size
 * "swap" doen't work
+* Each channel value onlu can be seen in Auto detection mode
+* Endian not be worked
+* want h*w > file h*w => if - else statement!
