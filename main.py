@@ -75,7 +75,6 @@ class TaskThread(QtCore.QThread):
         self.taskFinished.emit()
 
 
-#Main Window only about V!!
 class MainWindow(QMainWindow):
     count = 0
     def __init__(self):
@@ -85,8 +84,8 @@ class MainWindow(QMainWindow):
         self.connect_action()
 
         self.filepath = None
-        self.format = 1
-        self._format = 1
+        self.format = YUVFormat.YUYV_LE
+        self._format = YUVFormat.YUYV_LE
         self.imgwidth = 400
         self.imgheight = 400
         self.factor = 1.0
@@ -97,7 +96,7 @@ class MainWindow(QMainWindow):
         self.myLongTask = TaskThread()
         self.myLongTask.taskFinished.connect(self.onFinished)
 
-#DELETE TO DESIGNER
+
     def action_icon(self):
         icon_open = QIcon()
         icon_save = QIcon()
@@ -147,7 +146,7 @@ class MainWindow(QMainWindow):
         self.radiobutton_le.clicked.connect(self.match_format)
 
         self.LineEdit_width.textEdited.connect(self.update_size)
-        self.LineEdit_height.textEdited.connect(self.update_size2)
+        self.LineEdit_height.textEdited.connect(self.update_size)
         self.apply_button.clicked.connect(self.asign_format)
 
         self.auto_btn.clicked.connect(self.auto_detect)
@@ -197,9 +196,10 @@ class MainWindow(QMainWindow):
             pixmap = self.pix
             obj = pixmap.toImage()
             obj.save(self.filepath, "PNG")
-            self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
+            self.statusbarge("Successfully saved: {}".format(self.fname))
         except AttributeError:
             pass
+
 
     def checkbox_state(self):
         before_format = self._format
@@ -328,7 +328,6 @@ class MainWindow(QMainWindow):
             self.LineEdit_height.setText(str(self.imgheight))
             log = LogObject(self)
             end = timer()
-            #self.tt = float(end - start)
             print('Time consumption:', end - start)
             self.statusbar.showMessage("Successfully Loaded: {}".format(self.filepath))
             self.information()
@@ -406,18 +405,65 @@ class MainWindow(QMainWindow):
         self.asign_format()
 
 
+    def match_format2(self):
+        if self.format > 0 and self.format < 9:
+            if self.radiobutton_le.isChecked():
+                if self.format == YUVFormat.VYUY_BE:
+                    self.format = YUVFormat.YUYV_LE
+                elif self.format == YUVFormat.YVYU_BE:
+                    self.format = YUVFormat.UYVY_LE
+                elif self.format == YUVFormat.UYVY_BE:
+                    self.format = YUVFormat.YVYU_LE
+                elif self.format == YUVFormat.YUYV_BE:
+                    self.format = YUVFormat.VYUY_LE
+            elif self.radiobutton_be.isChecked():
+                if self.format == YUVFormat.YUYV_LE:
+                    self.format = YUVFormat.VYUY_BE
+                elif self.format == YUVFormat.UYVY_LE:
+                    self.format = YUVFormat.YVYU_BE
+                elif self.format == YUVFormat.YVYU_LE:
+                    self.format = YUVFormat.UYVY_BE
+                elif self.format == YUVFormat.VYUY_LE:
+                    self.format = YUVFormat.YUYV_BE
+
+        elif self.format > 10 and self.format < 19:
+            if self.radiobutton_le.isChecked():
+                if self.format == RGBFormat.RGBP_BE:
+                    self.format = RGBFormat.BGR3_LE
+                elif self.format == RGBFormat.XR24_BE:
+                    self.format = RGBFormat.RGB3_LE
+                elif self.format == RGBFormat.RGB3_BE:
+                    self.format = RGBFormat.XR24_LE
+                elif self.format == RGBFormat.BGR3_BE:
+                    self.format = RGBFormat.RGBP_LE
+            elif self.radiobutton_be.isChecked():
+                if self.format == RGBFormat.BGR3_LE:
+                    self.format = RGBFormat.RGBP_BE
+                elif self.format == RGBFormat.RGB3_LE:
+                    self.format = RGBFormat.XR24_BE
+                elif self.format == RGBFormat.XR24_LE:
+                    self.format = RGBFormat.RGB3_BE
+                elif self.format == RGBFormat.RGBP_LE:
+                    self.format = RGBFormat.BGR3_BE
+            print(self.format)
+
+
     def auto_detect(self):
+        self.onStart()
+
         try:
             rgb, yuv = [], []
             rgb = RGBFormat
             yuv = YUVFormat
             if self.format in yuv:
+                print('yuv')
                 data = {'y':1, 'u':1, 'v':1}
                 for i in range(4):
                     if 0 < self.format < 5:
                         self.format = i + 1
-                    else:
-                        self.format = i + 5
+                    #else:
+                    #    self.format = i + 5
+                    self.match_format2()
                     pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
                     if self.format == 1 or self.format == 2:
                         if not self.checkbox_y.isChecked():
@@ -438,6 +484,7 @@ class MainWindow(QMainWindow):
                     self.load_to_sub(self.pix)
 
             elif self.format in rgb:
+                print("rgb")
                 data = {'r':1, 'g':1, 'b':1}
                 for i in range(4):
                     if 10 < self.format < 15:
@@ -462,8 +509,12 @@ class MainWindow(QMainWindow):
                     _pixmap = pa.decode(data)
                     self.pix = _pixmap
                     self.load_to_sub(self.pix)
+
         except TypeError:
-            pass
+            w = QWidget()
+            QMessageBox.warning(w, "Error", "You should load the image first!")
+
+        log = LogObject(self)
 
 
     def load_to_sub(self, picture):
@@ -515,45 +566,51 @@ class MainWindow(QMainWindow):
 #Need to check the performance of each part
 #then, should change! for improve performance(within 5 seconds!!....)
     def hex_detect(self):
-        start = timer()
-        src = open(self.filepath, "rb").read()
-        length = 16
-        sep = ''
-        result = []
+        self.onStart()
         try:
-            xrange(0,1)
-        except NameError:
-            xrange = range
-        for i in xrange(0, len(src), length):
-            subSrc = src[i:i+length]
-            hexa = ''
-            isMiddle = False;
-            for h in xrange(0,len(subSrc)):
-                if h == length/2:
-                    hexa += ' '
-                h = subSrc[h]
-                if not isinstance(h, int):
-                    h = ord(h)
-                h = hex(h).replace('0x','')
-                if len(h) == 1:
-                    h = '0'+h
-                hexa += h+' '
-            hexa = hexa.strip(' ')
-            text = ''
-            for c in subSrc:
-                if not isinstance(c, int):
-                    c = ord(c)
-                if 0x20 <= c < 0x7F:
-                    text += chr(c)
-                else:
-                    text += sep
-            result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text))
-            #result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, textself.filepath
-        hex_src = '\n'.join(result)
-        self.label_2.setText(hex_src)
+            src = open(self.filepath, "rb").read()
+            length = 16
+            sep = ''
+            result = []
+            try:
+                xrange(0,1)
+            except NameError:
+                xrange = range
+            for i in xrange(0, len(src), length):
+                subSrc = src[i:i+length]
+                hexa = ''
+                isMiddle = False;
+                for h in xrange(0,len(subSrc)):
+                    if h == length/2:
+                        hexa += ' '
+                    h = subSrc[h]
+                    if not isinstance(h, int):
+                        h = ord(h)
+                    h = hex(h).replace('0x','')
+                    if len(h) == 1:
+                        h = '0'+h
+                    hexa += h+' '
+                hexa = hexa.strip(' ')
+                text = ''
+                for c in subSrc:
+                    if not isinstance(c, int):
+                        c = ord(c)
+                    if 0x20 <= c < 0x7F:
+                        text += chr(c)
+                    else:
+                        text += sep
+                result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text))
+                #result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, textself.filepath
+            hex_src = '\n'.join(result)
+            self.label_2.setText(hex_src)
+            log = LogObject(self)
+        except FileNotFoundError:
+            w = QWidget()
+            QMessageBox.warning(w, "Error", "You should load the image first!")
+        except TypeError:
+            w = QWidget()
+            QMessageBox.warning(w, "Error", "You should load the image first!")
         log = LogObject(self)
-        end = timer()
-        print(end - start)
 
 
     def update_size(self):
@@ -561,11 +618,23 @@ class MainWindow(QMainWindow):
             try:
                 self.imgwidth = int(self.LineEdit_width.text())
             except ValueError:
-                pass
+                w = QWidget()
+                QMessageBox.warning(w, "Error", "You should set the file size more than 0")
+            if self.imgwidth == 0:
+                w = QWidget()
+                QMessageBox.warning(w, "Error", "You should set the file size more than 0")
 
-    def update_size2(self):
+
         if self.LineEdit_height.text():
-            self.imgheight = int(self.LineEdit_height.text())
+            try:
+                self.imgheight = int(self.LineEdit_height.text())
+            except ValueError:
+                w = QWidget()
+                QMessageBox.warning(w, "Error", "You should set the file size more than 0")
+            if self.imgheight == 0:
+                w = QWidget()
+                QMessageBox.warning(w, "Error", "You should set the file size more than 0")
+
 
 
     def zoom_in(self):
@@ -612,7 +681,7 @@ class MainWindow(QMainWindow):
         info = []
 
         info.append(('Filename: %s') % (self.filepath))
-        info.append(('Format (in): %d') % (self._format))
+        info.append(('Format: %d') % (self._format))
         info.append(("Image Width: %d") % (self.imgwidth))
         info.append(("Image Height: %d") % (self.imgheight))
 
@@ -622,6 +691,7 @@ class MainWindow(QMainWindow):
         info.append(('BPP (bytes): %d') % (int(bpp / 8)))
         info.append((' - Want to read file size(bytes): %d') % (int(buf)))
         info.append((' - Want to read file w*h: %d') % (int(buf / (bpp / 8))))
+
 
         _info = '\n'.join(info)
 
@@ -635,3 +705,4 @@ if __name__ == '__main__':
     WINDOW.setWindowTitle('Raw Image viewer')
     WINDOW.show()
     sys.exit(APP.exec_())
+

@@ -80,7 +80,7 @@ class _Parser:
 
             file = QFile(filepath)
             self._filesize_ = file.size()  #f_size = w*h*bpp/3
-
+            print(form)
 
             if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
                 image_out = self.YUV422(width, height, form, f_val)
