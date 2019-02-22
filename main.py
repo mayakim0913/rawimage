@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
         self.radiobutton_le.clicked.connect(self.match_format)
 
         self.LineEdit_width.textEdited.connect(self.update_size)
-        self.LineEdit_height.textEdited.connect(self.update_size2)
+        self.LineEdit_height.textEdited.connect(self.update_size)
         self.apply_button.clicked.connect(self.asign_format)
 
         self.auto_btn.clicked.connect(self.auto_detect)
@@ -363,6 +363,7 @@ class MainWindow(QMainWindow):
 
 
     def match_format(self):
+        print(self.format)
         if self.format > 0 and self.format < 9:
             if self.radiobutton_le.isChecked():
                 if self.format == YUVFormat.VYUY_BE:
@@ -382,7 +383,6 @@ class MainWindow(QMainWindow):
                     self.format = YUVFormat.UYVY_BE
                 elif self.format == YUVFormat.VYUY_LE:
                     self.format = YUVFormat.YUYV_BE
-
         elif self.format > 10 and self.format < 19:
             if self.radiobutton_le.isChecked():
                 if self.format == RGBFormat.RGBP_BE:
@@ -403,6 +403,7 @@ class MainWindow(QMainWindow):
                 elif self.format == RGBFormat.RGBP_LE:
                     self.format = RGBFormat.BGR3_BE
 
+        print(self.format)
         self.asign_format()
 
 
@@ -413,7 +414,6 @@ class MainWindow(QMainWindow):
             rgb, yuv = [], []
             rgb = RGBFormat
             yuv = YUVFormat
-            print(self.format)
             if self.format in yuv:
                 data = {'y':1, 'u':1, 'v':1}
                 for i in range(4):
@@ -421,6 +421,8 @@ class MainWindow(QMainWindow):
                         self.format = i + 1
                     else:
                         self.format = i + 5
+
+                    self.match_format()
                     pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
                     if self.format == 1 or self.format == 2:
                         if not self.checkbox_y.isChecked():
@@ -573,12 +575,23 @@ class MainWindow(QMainWindow):
             try:
                 self.imgwidth = int(self.LineEdit_width.text())
             except ValueError:
-                pass
+                w = QWidget()
+                QMessageBox.warning(w, "Error", "You should set the file size more than 0")
+            if self.imgwidth == 0:
+                w = QWidget()
+                QMessageBox.warning(w, "Error", "You should set the file size more than 0")
 
 
-    def update_size2(self):
         if self.LineEdit_height.text():
-            self.imgheight = int(self.LineEdit_height.text())
+            try:
+                self.imgheight = int(self.LineEdit_height.text())
+            except ValueError:
+                w = QWidget()
+                QMessageBox.warning(w, "Error", "You should set the file size more than 0")
+            if self.imgheight == 0:
+                w = QWidget()
+                QMessageBox.warning(w, "Error", "You should set the file size more than 0")
+
 
 
     def zoom_in(self):
@@ -625,7 +638,7 @@ class MainWindow(QMainWindow):
         info = []
 
         info.append(('Filename: %s') % (self.filepath))
-        info.append(('Format (in): %d') % (self._format))
+        info.append(('Format: %d') % (self._format))
         info.append(("Image Width: %d") % (self.imgwidth))
         info.append(("Image Height: %d") % (self.imgheight))
 
@@ -648,3 +661,4 @@ if __name__ == '__main__':
     WINDOW.setWindowTitle('Raw Image viewer')
     WINDOW.show()
     sys.exit(APP.exec_())
+
