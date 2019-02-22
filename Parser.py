@@ -188,7 +188,8 @@ class _Parser:
     def RGB3(self, width, height, form, f_rgb):
         self._bpp_ = self.getbpp('RGB3')
         self._bufsize_ = width * height * (self._bpp_ / 8)
-        wh = int(self._filesize_ / (self._bpp_ / 8))
+        w_wh = int(self._bufsize_ / (self._bpp_ / 8))
+        f_wh = int(self._filesize_ / (self._bpp_ / 8))
 
         im = np.fromfile(f_rgb, dtype=np.uint8)
 
@@ -198,20 +199,24 @@ class _Parser:
             a = self.choice_val(im)
             im = a
 
-        im.tofile("changed_file.bin")
-        fh = open("changed_file.bin", "rb")
+        if w_wh <= f_wh:
+            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
 
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
+        else:
+            im.tofile("changed_file.bin")
+            fh = open("changed_file.bin", "rb")
 
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = 0
-                try:
-                    pix_b, pix_g, pix_r = (b for b in fh.read(3))
-                except:
-                    pass
-                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+            image_out = Image.new("RGB", (width, height), (0,0,0))
+            pix = image_out.load()
+
+            for i in range(0, height):
+                for j in range(0, int(width)):
+                    pix_r = pix_g = pix_b = 0
+                    try:
+                        pix_b, pix_g, pix_r = (b for b in fh.read(3))
+                    except:
+                        pass
+                    pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
 
@@ -219,7 +224,8 @@ class _Parser:
     def BGB3(self, width, height, form, f_rgb):
         self._bpp_ = self.getbpp('RGB3')
         self._bufsize_ = width * height * (self._bpp_ / 8)
-        wh = int(self._filesize_ / (self._bpp_ / 8))
+        w_wh = int(self._bufsize_ / (self._bpp_ / 8))
+        f_wh = int(self._filesize_ / (self._bpp_ / 8))
 
         im = np.fromfile(f_rgb, dtype=np.uint8)
         #buf = np.zeros(wh, 3), dtype=np.uint8)
@@ -243,20 +249,24 @@ class _Parser:
                 im = np.delete(im, 2, 1)
                 im = np.insert(im, 2, 0, 1)
 
-        im.tofile("changed_file.bin")
-        fh = open("changed_file.bin", "rb")
+        if w_wh <= f_wh:
+            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
 
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
+        else:
+            im.tofile("changed_file.bin")
+            fh = open("changed_file.bin", "rb")
 
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = 0
-                try:
-                    pix_r, pix_g, pix_b = (b for b in fh.read(3))
-                except:
-                    pass
-                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+            image_out = Image.new("RGB", (width, height), (0,0,0))
+            pix = image_out.load()
+
+            for i in range(0, height):
+                for j in range(0, int(width)):
+                    pix_r = pix_g = pix_b = 0
+                    try:
+                        pix_r, pix_g, pix_b = (b for b in fh.read(3))
+                    except:
+                        pass
+                    pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
 
@@ -264,6 +274,8 @@ class _Parser:
     def XRGB(self, width, height, f_rgb):
         self._bpp_ = self.getbpp('XR24')
         self._bufsize_ = width * height * (self._bpp_ / 8)
+        w_wh = int(self._bufsize_ / (self._bpp_ / 8))
+        f_wh = int(self._filesize_ / (self._bpp_ / 8))
 
         im = np.fromfile(f_rgb, dtype=np.uint8)
         im = im.reshape(-1, 4)
@@ -274,20 +286,24 @@ class _Parser:
             a = self.choice_val(im)
             im = a
 
-        im.tofile("changed_file.bin")
-        fh = open("changed_file.bin", "rb")
+        if w_wh <= f_wh:
+            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
 
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
+        else:
+            im.tofile("changed_file.bin")
+            fh = open("changed_file.bin", "rb")
 
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = 0
-                try:
-                    pix_b, pix_g, pix_r = (b for b in fh.read(3))
-                except:
-                    pass
-                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+            image_out = Image.new("RGB", (width, height), (0,0,0))
+            pix = image_out.load()
+
+            for i in range(0, height):
+                for j in range(0, int(width)):
+                    pix_r = pix_g = pix_b = 0
+                    try:
+                        pix_b, pix_g, pix_r = (b for b in fh.read(3))
+                    except:
+                        pass
+                    pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
 
@@ -296,6 +312,8 @@ class _Parser:
     def RGBP(self, width, height, f_rgb):
         self._bpp_ = self.getbpp('RGBP')
         self._bufsize_ = width * height * (self._bpp_ / 8)
+        w_wh = int(self._bufsize_ / (self._bpp_ / 8))
+        f_wh = int(self._filesize_ / (self._bpp_ / 8))
 
         #RRRR RGGG GGGB BBBB
         im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
@@ -315,21 +333,25 @@ class _Parser:
 
         im = 0xFF000000 + blue + green + red
 
-        im.tofile("changed_file.bin")
-        fh = open("changed_file.bin", "rb")
+        if w_wh <= f_wh:
+            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
 
-        image_out = Image.new("RGB", (width, height), (0,0,0))
-        pix = image_out.load()
+        else:
+            im.tofile("changed_file.bin")
+            fh = open("changed_file.bin", "rb")
 
-        for i in range(0, height):
-            for j in range(0, int(width)):
-                pix_r = pix_g = pix_b = pix_a = 0
-                try:
-                    pix_b, pix_g, pix_r, pix_a = (b for b in fh.read(4))
-                except:
-                    pass
+            image_out = Image.new("RGB", (width, height), (0,0,0))
+            pix = image_out.load()
 
-                pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+            for i in range(0, height):
+                for j in range(0, int(width)):
+                    pix_r = pix_g = pix_b = pix_a = 0
+                    try:
+                        pix_b, pix_g, pix_r, pix_a = (b for b in fh.read(4))
+                    except:
+                        pass
+
+                    pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
 
