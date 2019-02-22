@@ -94,9 +94,4 @@ $ python main.py
 ## Limitation
 * Hex Viewer Slow
 * try - Exception not all processed
-* not to be load for large size than original file w*h size
-* "swap" doen't work
-* Each channel value onlu can be seen in Auto detection mode
-* Endian not be worked
-* want h*w > file h*w => if - else statement!
-##########* auto, hex의 시간
+* Can't load big endian image in auto detection mode
