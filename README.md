@@ -62,6 +62,13 @@ $ sudo apt-get install python3
 $ curl -k -O https://bootstrap.pypa.io/get-pip.py
 $ python get-pip.py
 $ pip install times pytest-timeit Pillow enum PyQt5 opencv-python numpy
+
+**1) Installation (on Ubuntu 16.04)**
+```ruby
+$ sudo apt-get install python3
+$ curl -k -O https://bootstrap.pypa.io/get-pip.py
+$ python get-pip.py
+$ pip install times pytest-timeit Pillow enum PyQt5 opencv-python numpy
 ```
 
 **2) Usage Syntax**
