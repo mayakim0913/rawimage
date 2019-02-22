@@ -10,21 +10,11 @@ python: 3.6
 
 """
 
-#modulization: MVC
-#1 file 1 class!!
-#variable name: same way to either upper or _
-
-#M: parsing
-#v(designer): only UI part, icon, button
-#c(developer): eventwatcher / clicked event
-
-#1. SYSTEM
 from enum import Enum, IntEnum
 import sys
 import os
 import time
 
-#2. THIRD
 from PyQt5 import (Qt, QtCore, QtGui, QtWidgets, uic)
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import *
@@ -33,13 +23,15 @@ from PyQt5.QtCore import *
 from PIL import Image
 from timeit import default_timer as timer
 
-#3. private
 from LoadPicture import *
 import Parser
 
-#Can change other way
+
+
+
 THINGS = os.path.dirname(os.path.abspath(__file__))
 L = lambda f: os.path.join(THINGS, f)
+
 
 
 class YUVFormat(IntEnum):
@@ -54,6 +46,7 @@ class YUVFormat(IntEnum):
     VYUY_BE = 8
 
 
+
 class RGBFormat(IntEnum):
     BGR3_LE = 11
     RGB3_LE = 12
@@ -65,14 +58,13 @@ class RGBFormat(IntEnum):
     XR24_BE = 17
     RGBP_BE = 18
 
+
+
 class TaskThread(QtCore.QThread):
-    #taskFinished = QtCore.pyqtSignal(int)
     taskFinished = QtCore.pyqtSignal()
     def run(self):
-        #for i in range(101):
-            #self.taskFinished.emit(i)
-            #time.sleep(0.1)
         self.taskFinished.emit()
+
 
 
 class MainWindow(QMainWindow):
@@ -158,7 +150,6 @@ class MainWindow(QMainWindow):
         self.filepath = self.fname
         self.radiobutton_le.setChecked(True)
 
-
         if self.format > 0 and self.format < 9:
             self.group_yuv.setEnabled(True)
             self.group_rgb.setEnabled(False)
@@ -170,7 +161,6 @@ class MainWindow(QMainWindow):
             self.checkbox_r.setChecked(False)
             self.checkbox_g.setChecked(False)
             self.checkbox_b.setChecked(False)
-
 
         elif self.format > 10 and self.format < 19:
             self.group_yuv.setEnabled(False)
@@ -184,7 +174,6 @@ class MainWindow(QMainWindow):
             self.checkbox_u.setChecked(False)
             self.checkbox_v.setChecked(False)
             self.checkbox_swap.setChecked(False)
-
 
         self.asign_format()
 
@@ -263,6 +252,7 @@ class MainWindow(QMainWindow):
     def onStart(self):
         self.pg.setRange(0,0)
         self.myLongTask.start()
+
 
     def onFinished(self):
         self.pg.setRange(0,1)
@@ -461,8 +451,6 @@ class MainWindow(QMainWindow):
                 for i in range(4):
                     if 0 < self.format < 5:
                         self.format = i + 1
-                    #else:
-                    #    self.format = i + 5
                     self.match_format2()
                     pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
                     if self.format == 1 or self.format == 2:
@@ -563,8 +551,6 @@ class MainWindow(QMainWindow):
         self.UserInput_PixelValue_B.setText("{}".format(color.blue()))
 
 
-#Need to check the performance of each part
-#then, should change! for improve performance(within 5 seconds!!....)
     def hex_detect(self):
         self.onStart()
         try:
