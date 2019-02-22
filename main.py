@@ -75,7 +75,6 @@ class TaskThread(QtCore.QThread):
         self.taskFinished.emit()
 
 
-#Main Window only about V!!
 class MainWindow(QMainWindow):
     count = 0
     def __init__(self):
@@ -97,7 +96,7 @@ class MainWindow(QMainWindow):
         self.myLongTask = TaskThread()
         self.myLongTask.taskFinished.connect(self.onFinished)
 
-#DELETE TO DESIGNER
+
     def action_icon(self):
         icon_open = QIcon()
         icon_save = QIcon()
@@ -200,6 +199,7 @@ class MainWindow(QMainWindow):
             self.statusbarge("Successfully saved: {}".format(self.fname))
         except AttributeError:
             pass
+
 
     def checkbox_state(self):
         before_format = self._format
@@ -328,7 +328,6 @@ class MainWindow(QMainWindow):
             self.LineEdit_height.setText(str(self.imgheight))
             log = LogObject(self)
             end = timer()
-            #self.tt = float(end - start)
             print('Time consumption:', end - start)
             self.statusbar.showMessage("Successfully Loaded: {}".format(self.filepath))
             self.information()
@@ -363,7 +362,6 @@ class MainWindow(QMainWindow):
 
 
     def match_format(self):
-        print(self.format)
         if self.format > 0 and self.format < 9:
             if self.radiobutton_le.isChecked():
                 if self.format == YUVFormat.VYUY_BE:
@@ -383,6 +381,7 @@ class MainWindow(QMainWindow):
                     self.format = YUVFormat.UYVY_BE
                 elif self.format == YUVFormat.VYUY_LE:
                     self.format = YUVFormat.YUYV_BE
+
         elif self.format > 10 and self.format < 19:
             if self.radiobutton_le.isChecked():
                 if self.format == RGBFormat.RGBP_BE:
@@ -403,8 +402,50 @@ class MainWindow(QMainWindow):
                 elif self.format == RGBFormat.RGBP_LE:
                     self.format = RGBFormat.BGR3_BE
 
-        print(self.format)
         self.asign_format()
+
+
+    def match_format2(self):
+        if self.format > 0 and self.format < 9:
+            if self.radiobutton_le.isChecked():
+                if self.format == YUVFormat.VYUY_BE:
+                    self.format = YUVFormat.YUYV_LE
+                elif self.format == YUVFormat.YVYU_BE:
+                    self.format = YUVFormat.UYVY_LE
+                elif self.format == YUVFormat.UYVY_BE:
+                    self.format = YUVFormat.YVYU_LE
+                elif self.format == YUVFormat.YUYV_BE:
+                    self.format = YUVFormat.VYUY_LE
+            elif self.radiobutton_be.isChecked():
+                if self.format == YUVFormat.YUYV_LE:
+                    self.format = YUVFormat.VYUY_BE
+                elif self.format == YUVFormat.UYVY_LE:
+                    self.format = YUVFormat.YVYU_BE
+                elif self.format == YUVFormat.YVYU_LE:
+                    self.format = YUVFormat.UYVY_BE
+                elif self.format == YUVFormat.VYUY_LE:
+                    self.format = YUVFormat.YUYV_BE
+
+        elif self.format > 10 and self.format < 19:
+            if self.radiobutton_le.isChecked():
+                if self.format == RGBFormat.RGBP_BE:
+                    self.format = RGBFormat.BGR3_LE
+                elif self.format == RGBFormat.XR24_BE:
+                    self.format = RGBFormat.RGB3_LE
+                elif self.format == RGBFormat.RGB3_BE:
+                    self.format = RGBFormat.XR24_LE
+                elif self.format == RGBFormat.BGR3_BE:
+                    self.format = RGBFormat.RGBP_LE
+            elif self.radiobutton_be.isChecked():
+                if self.format == RGBFormat.BGR3_LE:
+                    self.format = RGBFormat.RGBP_BE
+                elif self.format == RGBFormat.RGB3_LE:
+                    self.format = RGBFormat.XR24_BE
+                elif self.format == RGBFormat.XR24_LE:
+                    self.format = RGBFormat.RGB3_BE
+                elif self.format == RGBFormat.RGBP_LE:
+                    self.format = RGBFormat.BGR3_BE
+            print(self.format)
 
 
     def auto_detect(self):
@@ -415,14 +456,14 @@ class MainWindow(QMainWindow):
             rgb = RGBFormat
             yuv = YUVFormat
             if self.format in yuv:
+                print('yuv')
                 data = {'y':1, 'u':1, 'v':1}
                 for i in range(4):
                     if 0 < self.format < 5:
                         self.format = i + 1
-                    else:
-                        self.format = i + 5
-
-                    self.match_format()
+                    #else:
+                    #    self.format = i + 5
+                    self.match_format2()
                     pa = Parser._Parser(self.filepath, self.format, self.imgwidth, self.imgheight)
                     if self.format == 1 or self.format == 2:
                         if not self.checkbox_y.isChecked():
@@ -443,6 +484,7 @@ class MainWindow(QMainWindow):
                     self.load_to_sub(self.pix)
 
             elif self.format in rgb:
+                print("rgb")
                 data = {'r':1, 'g':1, 'b':1}
                 for i in range(4):
                     if 10 < self.format < 15:
@@ -471,6 +513,7 @@ class MainWindow(QMainWindow):
         except TypeError:
             w = QWidget()
             QMessageBox.warning(w, "Error", "You should load the image first!")
+
         log = LogObject(self)
 
 
