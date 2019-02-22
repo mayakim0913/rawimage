@@ -5,6 +5,7 @@
 
 #pip install numexpr==2.6.1
 
+
 import sys
 from enum import Enum, IntEnum
 import inspect
@@ -20,6 +21,7 @@ import cv2
 import numpy as np
 
 
+
 class YUVFormat(IntEnum):
     YUYV_LE = 1
     UYVY_LE = 2
@@ -30,6 +32,8 @@ class YUVFormat(IntEnum):
     UYVY_BE = 6
     YVYU_BE = 7
     VYUY_BE = 8
+
+
 
 class RGBFormat(IntEnum):
     BGR3_LE = 11
@@ -43,6 +47,7 @@ class RGBFormat(IntEnum):
     RGBP_BE = 18
 
 
+
 class _Parser:
     __DECODE_MAP = {
         #color:[bit per pixel, desc]
@@ -53,12 +58,14 @@ class _Parser:
         }
 
 
+
     def getbpp(cls, color):
         return cls.__DECODE_MAP[color][0]
 
 
+
     def __init__(self, _filepath, _format, _imgwidth, _imgheight):
-        self._filepath_ = _filepath #__를 앞
+        self._filepath_ = _filepath
         self._format_ = _format
         self._imgwidth_ = _imgwidth
         self._imgheight_ = _imgheight
@@ -66,6 +73,7 @@ class _Parser:
         self._filesize_ = None
         self._bufsize_ = None
         self._bpp_ = None
+
 
 
     def decode(self, choice):
@@ -77,11 +85,9 @@ class _Parser:
             self._data_.update(choice)
 
             f_val = open(filepath, "rb")
-            #will open the file for read mode (r) with binary I/O (b).
 
             file = QFile(filepath)
-            self._filesize_ = file.size()  #f_size = w*h*bpp/3
-            print(form)
+            self._filesize_ = file.size()
 
             if YUVFormat.YUYV_LE <= form <= YUVFormat.VYUY_BE:
                 image_out = self.YUV422(width, height, form, f_val)
@@ -107,16 +113,8 @@ class _Parser:
             pass
 
 
+
     def YUV422(self, width, height, form, f_uyvy):
-        #Each four bytes is two pixels.
-        #Each four bytes is two Y’s, a Cb and a Cr.
-
-        #[Y0 U0 V1] [Y1 U0 V1] [Y2 U2 V3] [Y3 U2 V3]
-
-        #Y goes to one of the pixels,
-        #and the Cb and Cr belong to both pixels. As you can see,
-        #the Cr and Cb components have half the horizontal resolution of the Y component.
-
         self._bpp_ = self.getbpp('YUV422')
         self._bufsize_ = width * height * (self._bpp_ / 8)
 
@@ -173,6 +171,7 @@ class _Parser:
         return image_out
 
 
+
     def choice_yuvval(self, _y1, _y2, _u, _v):
         if self._data_['y'] == 0:
             _y1 = 16
@@ -192,7 +191,6 @@ class _Parser:
         f_wh = int(self._filesize_ / (self._bpp_ / 8))
 
         im = np.fromfile(f_rgb, dtype=np.uint8)
-
         im = im.reshape(-1, 3)
 
         if self._data_ != {'r':1, 'g':1, 'b':1}:
@@ -221,6 +219,7 @@ class _Parser:
         return image_out
 
 
+
     def BGB3(self, width, height, form, f_rgb):
         self._bpp_ = self.getbpp('RGB3')
         self._bufsize_ = width * height * (self._bpp_ / 8)
@@ -228,11 +227,7 @@ class _Parser:
         f_wh = int(self._filesize_ / (self._bpp_ / 8))
 
         im = np.fromfile(f_rgb, dtype=np.uint8)
-        #buf = np.zeros(wh, 3), dtype=np.uint8)
-
         im = im.reshape(-1, 3)
-        #im = im.reshape(width, height, 3)
-        #data = np.asarray(im)
 
         if self._data_ != {'r':1, 'g':1, 'b':1}:
             a = self.choice_val(im)
@@ -269,6 +264,7 @@ class _Parser:
                     pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
+
 
 
     def XRGB(self, width, height, f_rgb):
@@ -315,13 +311,11 @@ class _Parser:
         w_wh = int(self._bufsize_ / (self._bpp_ / 8))
         f_wh = int(self._filesize_ / (self._bpp_ / 8))
 
-        #RRRR RGGG GGGB BBBB
         im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
 
-        #alpha = 0xff
-        red = ((im & 0xF800) >> 8) # (arr & 0xf800) >> 11; b << 3;
-        green = ((im & 0x07E0) << 5) # (arr & 0x07e0) >> 5; g  = g << 2; g << 8
-        blue = ((im & 0x001F) << 19) # (arr & 0x001f); r << 3; r << 16
+        red = ((im & 0xF800) >> 8)
+        green = ((im & 0x07E0) << 5)
+        blue = ((im & 0x001F) << 19)
 
         if self._data_ != {'r':1, 'g':1, 'b':1}:
             if self._data_['r'] == 0:
@@ -356,6 +350,7 @@ class _Parser:
         return image_out
 
 
+
     def choice_val(self, im):
         if self._data_['r'] == 0:
             im = np.delete(im, 0, 1)
@@ -367,6 +362,7 @@ class _Parser:
             im = np.delete(im, 2, 1)
             im = np.insert(im, 2, 0, 1)
         return im
+
 
 
     def send(self):
