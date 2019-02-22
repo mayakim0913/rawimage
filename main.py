@@ -85,8 +85,8 @@ class MainWindow(QMainWindow):
         self.connect_action()
 
         self.filepath = None
-        self.format = 1
-        self._format = 1
+        self.format = YUVFormat.YUYV_LE
+        self._format = YUVFormat.YUYV_LE
         self.imgwidth = 400
         self.imgheight = 400
         self.factor = 1.0
@@ -197,7 +197,7 @@ class MainWindow(QMainWindow):
             pixmap = self.pix
             obj = pixmap.toImage()
             obj.save(self.filepath, "PNG")
-            self.statusbar.showMessage("Successfully saved: {}".format(self.fname))
+            self.statusbarge("Successfully saved: {}".format(self.fname))
         except AttributeError:
             pass
 
@@ -407,10 +407,13 @@ class MainWindow(QMainWindow):
 
 
     def auto_detect(self):
+        self.onStart()
+
         try:
             rgb, yuv = [], []
             rgb = RGBFormat
             yuv = YUVFormat
+            print(self.format)
             if self.format in yuv:
                 data = {'y':1, 'u':1, 'v':1}
                 for i in range(4):
@@ -462,8 +465,11 @@ class MainWindow(QMainWindow):
                     _pixmap = pa.decode(data)
                     self.pix = _pixmap
                     self.load_to_sub(self.pix)
+
         except TypeError:
-            pass
+            w = QWidget()
+            QMessageBox.warning(w, "Error", "You should load the image first!")
+        log = LogObject(self)
 
 
     def load_to_sub(self, picture):
@@ -515,45 +521,51 @@ class MainWindow(QMainWindow):
 #Need to check the performance of each part
 #then, should change! for improve performance(within 5 seconds!!....)
     def hex_detect(self):
-        start = timer()
-        src = open(self.filepath, "rb").read()
-        length = 16
-        sep = ''
-        result = []
+        self.onStart()
         try:
-            xrange(0,1)
-        except NameError:
-            xrange = range
-        for i in xrange(0, len(src), length):
-            subSrc = src[i:i+length]
-            hexa = ''
-            isMiddle = False;
-            for h in xrange(0,len(subSrc)):
-                if h == length/2:
-                    hexa += ' '
-                h = subSrc[h]
-                if not isinstance(h, int):
-                    h = ord(h)
-                h = hex(h).replace('0x','')
-                if len(h) == 1:
-                    h = '0'+h
-                hexa += h+' '
-            hexa = hexa.strip(' ')
-            text = ''
-            for c in subSrc:
-                if not isinstance(c, int):
-                    c = ord(c)
-                if 0x20 <= c < 0x7F:
-                    text += chr(c)
-                else:
-                    text += sep
-            result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text))
-            #result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, textself.filepath
-        hex_src = '\n'.join(result)
-        self.label_2.setText(hex_src)
+            src = open(self.filepath, "rb").read()
+            length = 16
+            sep = ''
+            result = []
+            try:
+                xrange(0,1)
+            except NameError:
+                xrange = range
+            for i in xrange(0, len(src), length):
+                subSrc = src[i:i+length]
+                hexa = ''
+                isMiddle = False;
+                for h in xrange(0,len(subSrc)):
+                    if h == length/2:
+                        hexa += ' '
+                    h = subSrc[h]
+                    if not isinstance(h, int):
+                        h = ord(h)
+                    h = hex(h).replace('0x','')
+                    if len(h) == 1:
+                        h = '0'+h
+                    hexa += h+' '
+                hexa = hexa.strip(' ')
+                text = ''
+                for c in subSrc:
+                    if not isinstance(c, int):
+                        c = ord(c)
+                    if 0x20 <= c < 0x7F:
+                        text += chr(c)
+                    else:
+                        text += sep
+                result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, text))
+                #result.append(('%08X:  %-'+str(length*(2+1)+1)+'s  |%s|') % (i, hexa, textself.filepath
+            hex_src = '\n'.join(result)
+            self.label_2.setText(hex_src)
+            log = LogObject(self)
+        except FileNotFoundError:
+            w = QWidget()
+            QMessageBox.warning(w, "Error", "You should load the image first!")
+        except TypeError:
+            w = QWidget()
+            QMessageBox.warning(w, "Error", "You should load the image first!")
         log = LogObject(self)
-        end = timer()
-        print(end - start)
 
 
     def update_size(self):
@@ -562,6 +574,7 @@ class MainWindow(QMainWindow):
                 self.imgwidth = int(self.LineEdit_width.text())
             except ValueError:
                 pass
+
 
     def update_size2(self):
         if self.LineEdit_height.text():
