@@ -473,7 +473,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>346</width>
-                 <height>138</height>
+                 <height>139</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gridLayout_15">
@@ -559,8 +559,8 @@
    <addaction name="actionSave_As"/>
    <addaction name="actionZoom_in"/>
    <addaction name="actionZoom_out"/>
-   <addaction name="actionHelp"/>
    <addaction name="actionAbout"/>
+   <addaction name="actionHelp"/>
    <addaction name="actionExit"/>
   </widget>
   <action name="actionOpen">
@@ -574,7 +574,7 @@
      <selectedon>:/open/open.png</selectedon>:/open/open.qrc</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>Open(Ctrl + O)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -586,7 +586,7 @@
      <normaloff>:/save/save.png</normaloff>:/save/save.png</iconset>
    </property>
    <property name="text">
-    <string>Save_As</string>
+    <string>Save_As(Ctrl + V)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -598,7 +598,7 @@
      <normaloff>:/exit/exit.png</normaloff>:/exit/exit.png</iconset>
    </property>
    <property name="text">
-    <string>Exit</string>
+    <string>Exit(Ctrl + Q)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -610,7 +610,7 @@
      <normaloff>:/zoomin/zoomin.png</normaloff>:/zoomin/zoomin.png</iconset>
    </property>
    <property name="text">
-    <string>Zoom_in</string>
+    <string>Zoom_in(Ctrl ++)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+=</string>
@@ -622,7 +622,7 @@
      <normaloff>:/zoomout/zoomout.png</normaloff>:/zoomout/zoomout.png</iconset>
    </property>
    <property name="text">
-    <string>Zoom_out</string>
+    <string>Zoom_out(Ctrl +-)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
@@ -634,7 +634,7 @@
      <normaloff>:/help/help.png</normaloff>:/help/help.png</iconset>
    </property>
    <property name="text">
-    <string>Help</string>
+    <string>Help(Ctrl + H)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+H</string>
@@ -646,7 +646,7 @@
      <normaloff>:/about/about.png</normaloff>:/about/about.png</iconset>
    </property>
    <property name="text">
-    <string>About</string>
+    <string>About(Ctrl + A)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>

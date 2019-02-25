@@ -653,12 +653,12 @@ class MainWindow(QMainWindow):
 
     def help(self):
         w = QWidget()
-        QMessageBox.information(w, "Help", "If you need any help, Please visit GitHub or mail to me \n E-mail: maya.kim@intel.com \n GitHub: https://github.com/mayakim0913/rawimage")
+        QMessageBox.information(w, "Help", "If you need any help, Please visit GitHub or email to me \n E-mail: maya.kim@intel.com \n GitHub: https://github.com/mayakim0913/rawimage")
 
 
     def about(self):
         w = QWidget()
-        QMessageBox.information(w, "About", "It loads Raw image files on Qt ui display and converts it to color format(YUV422, RGB888, RGB565, RGBA) and save to compression image format(JPEG, PNG)")
+        QMessageBox.information(w, "About", "* Raw image viewer loads and parses raw images into selected color format(YUV422, RGB888, RGB565, RGBA). \n * Version: V1.0.2019")
 
 
     def information(self):

@@ -283,7 +283,7 @@ class _Parser:
             im = a
 
         if w_wh <= f_wh:
-            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','BGR', 0, 1)
+            image_out = Image.frombuffer("RGB",[width, height], im, 'raw','RGB', 0, 1)
 
         else:
             im.tofile("changed_file.bin")
@@ -304,6 +304,73 @@ class _Parser:
         return image_out
 
 
+
+    def RGBP(self, width, height, f_rgb):
+        self._bpp_ = self.getbpp('RGBP')
+        self._bufsize_ = width * height * (self._bpp_ / 8)
+        w_wh = int(self._bufsize_ / (self._bpp_ / 8))
+        f_wh = int(self._filesize_ / (self._bpp_ / 8))
+
+        im = np.fromfile(f_rgb, dtype=np.uint16).astype(np.uint32)
+
+        red = ((im & 0xF800) >> 8)
+        green = ((im & 0x07E0) << 5)
+        blue = ((im & 0x001F) << 19)
+
+        if self._data_ != {'r':1, 'g':1, 'b':1}:
+            if self._data_['r'] == 0:
+                red = 0
+            if self._data_['g'] == 0:
+                green = 0
+            if self._data_['b'] == 0:
+                blue = 0
+
+        im = 0xFF000000 + blue + green + red
+
+        if w_wh <= f_wh:
+            image_out = Image.frombuffer("RGBA",[width, height], im, 'raw','RGBA', 0, 1)
+
+        else:
+            im.tofile("changed_file.bin")
+            fh = open("changed_file.bin", "rb")
+
+            image_out = Image.new("RGB", (width, height), (0,0,0))
+            pix = image_out.load()
+
+            for i in range(0, height):
+                for j in range(0, int(width)):
+                    pix_r = pix_g = pix_b = pix_a = 0
+                    try:
+                        pix_b, pix_g, pix_r, pix_a = (b for b in fh.read(4))
+                    except:
+                        pass
+
+                    pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
+
+        return image_out
+
+
+
+
+    def choice_val(self, im):
+        if self._data_['r'] == 0:
+            im = np.delete(im, 0, 1)
+            im = np.insert(im, 0, 0, 1)
+        if self._data_['g'] == 0:
+            im = np.delete(im, 1, 1)
+            im = np.insert(im, 1, 0, 1)
+        if self._data_['b'] == 0:
+            im = np.delete(im, 2, 1)
+            im = np.insert(im, 2, 0, 1)
+        return im
+
+
+
+    def send(self):
+        return self._filesize_, self._bufsize_, self._bpp_
+
+
+"""
 
     def RGBP(self, width, height, f_rgb):
         self._bpp_ = self.getbpp('RGBP')
@@ -350,20 +417,4 @@ class _Parser:
         return image_out
 
 
-
-    def choice_val(self, im):
-        if self._data_['r'] == 0:
-            im = np.delete(im, 0, 1)
-            im = np.insert(im, 0, 0, 1)
-        if self._data_['g'] == 0:
-            im = np.delete(im, 1, 1)
-            im = np.insert(im, 1, 0, 1)
-        if self._data_['b'] == 0:
-            im = np.delete(im, 2, 1)
-            im = np.insert(im, 2, 0, 1)
-        return im
-
-
-
-    def send(self):
-        return self._filesize_, self._bufsize_, self._bpp_
+"""
