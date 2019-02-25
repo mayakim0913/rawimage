@@ -85,7 +85,8 @@ $ git clone git@github.com:mayakim0913/rawimage.git
 * Ctrl + V: Show the file dialog to save the raw image file
 * Ctrl ++: Zoom in to +0.1
 * Ctrl +-: Zoom out to -0.1
-* Ctrl + I: Show the application information
+* Ctrl + A: Show the application information
+* Ctrl + H: Show information that how to get help
 * Ctrl + Q: Quik the Application
 
 
