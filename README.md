@@ -62,6 +62,13 @@ $ sudo apt-get install python3
 $ curl -k -O https://bootstrap.pypa.io/get-pip.py
 $ python get-pip.py
 $ pip install times pytest-timeit Pillow enum PyQt5 opencv-python numpy
+
+**1) Installation (on Ubuntu 16.04)**
+```ruby
+$ sudo apt-get install python3
+$ curl -k -O https://bootstrap.pypa.io/get-pip.py
+$ python get-pip.py
+$ pip install times pytest-timeit Pillow enum PyQt5 opencv-python numpy
 ```
 
 **2) Usage Syntax**
@@ -84,11 +91,14 @@ $ python main.py
 * Console: print out time consumption
 
 
+**4) Auto detection**
+* Format Matching
+  - If you set the format as YUV Format(YUYV, UYVY, VYUY, YVYU), it will be shown all YUV format)
+* Channel Matching
+  - If you choice only Y channel, It will be shown all YUV format with only Y channel
+
+
 ## Limitation
 * Hex Viewer Slow
 * try - Exception not all processed
-* not to be load for large size than original file w*h size
-* "swap" doen't work
-* Each channel value onlu can be seen in Auto detection mode
-* Endian not be worked
-* want h*w > file h*w => if - else statement!
+* Can't load big endian image in auto detection mode
