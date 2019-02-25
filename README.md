@@ -90,7 +90,7 @@ $ git clone git@github.com:mayakim0913/rawimage.git
 * Ctrl + Q: Quik the Application
 
 
-**4) Default Feature**
+**4) Default Settings**
 * Color format: YUYV
 * Width * Height: 400 * 400
 * Console: print out time consumption
