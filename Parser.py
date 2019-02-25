@@ -4,7 +4,6 @@
 #pylint:disable = no-name-in-module
 
 
-
 import sys
 from enum import Enum, IntEnum
 import inspect
