@@ -12,7 +12,6 @@ import inspect
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QFile
 
-
 from main import *
 from LoadPicture import *
 from PIL import Image
