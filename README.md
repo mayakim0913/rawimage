@@ -12,7 +12,7 @@ The program based on **Python**, and uses OpenCV, Numpy, Pillow libraries (teste
 * Hex mode: Display raw files as Hex mode
 > It can adjust image size, color format and check the value of each channel.
 * Supported formats are YUV422(UYVY, YUYV, VYUY, YVYU), RGB888, RGB565, RGBA
-> You can save the parsed file as compression image format(jpeg, png).
+> You can save the parsed file as compression image format(jpeg).
 
 ## Structure
 * **Application UI Structure**
@@ -64,16 +64,20 @@ $ git clone git@github.com:mayakim0913/rawimage.git
 (or git clone https://github.com/mayakim0913/rawimage)
 ```
 **2) Installation (on Windows 10)**
+* Download and execute the latest Python 3.* installation package from [here](https://www.python.org/downloads/).
+* Download [get-pip.py](https://bootstrap.pypa.io/get-pip.py). to a folder on your computer and then run python get-pip.py.
 ```
-$ sudo apt-get install python3
-$ curl -k -O https://bootstrap.pypa.io/get-pip.py
-$ python get-pip.py
-$ pip install times pytest-timeit Pillow enum34 PyQt5 opencv-python numpyy
+# ~/path_to_downloaded_folder$ python get-pip.py 
+```
+```
+$ pip install times pytest-timeit Pillow enum34 PyQt5 opencv-python numpy
+$ git clone git@github.com:mayakim0913/rawimage.git
+(or git clone https://github.com/mayakim0913/rawimage)
 ```
 
 **2) Usage Syntax**
 ```
-~/rawimage$ python main.py
+# ~/rawimage$ python main.py
 ```
 
 **3) Key board support**
