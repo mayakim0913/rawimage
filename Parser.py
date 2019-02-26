@@ -113,17 +113,19 @@ class _Parser:
             pass
 
 
-
     def YUV422(self, width, height, form, f_uyvy):
+
         self._bpp_ = self.getbpp('YUV422')
         self._bufsize_ = width * height * (self._bpp_ / 8)
 
         image_out = Image.new("RGB", (width, height), (0,0,0))
+
         pix = image_out.load()
 
 
         for i in range(0, height):
             for j in range(0, int(width/2)):
+
                 pix_y1 = pix_u = pix_y2 = pix_v = 0
 
                 if form == YUVFormat.YUYV_LE or form == YUVFormat.YUYV_BE:
@@ -133,6 +135,7 @@ class _Parser:
                         pass
 
                 elif form == YUVFormat.UYVY_LE or form == YUVFormat.UYVY_BE:
+
                     try:
                         pix_u, pix_y1, pix_v, pix_y2 = (b for b in f_uyvy.read(4))
                     except:
@@ -143,6 +146,7 @@ class _Parser:
                         pix_y1, pix_v, pix_y2, pix_u = (b for b in f_uyvy.read(4))
                     except:
                         pass
+
 
                 elif form == YUVFormat.VYUY_LE or form == YUVFormat.VYUY_BE:
                     try:
@@ -162,13 +166,16 @@ class _Parser:
                 blue = 1.164 * (pix_y1-16) + 1.596 * (pix_v - 128)
                 pix[j*2, i] = int(blue), int(green), int(red)
 
+
                 red = 1.164 * (pix_y2-16) + 2.018 * (pix_u - 128)
                 green = 1.164 * (pix_y2-16) - 0.813 * (pix_v - 128) - 0.391 * (pix_u - 128)
                 blue = 1.164 * (pix_y2-16) + 1.596 * (pix_v - 128)
                 pix[j*2+1, i] = int(blue), int(green), int(red)
 
 
+
         return image_out
+
 
 
 
@@ -181,6 +188,7 @@ class _Parser:
         if self._data_['v'] == 0:
             _v = 128
         return (_y1, _y2, _u, _v)
+
 
 
 
@@ -211,12 +219,13 @@ class _Parser:
                 for j in range(0, int(width)):
                     pix_r = pix_g = pix_b = 0
                     try:
-                        pix_b, pix_g, pix_r = (b for b in fh.read(3))
+                        pix_r, pix_g, pix_b = (b for b in fh.read(3))
                     except:
                         pass
                     pix[j, i] = int(pix_b), int(pix_g), int(pix_r)
 
         return image_out
+
 
 
 
@@ -368,4 +377,5 @@ class _Parser:
 
     def send(self):
         return self._filesize_, self._bufsize_, self._bpp_
+
 
