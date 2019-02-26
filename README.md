@@ -108,3 +108,4 @@ $ git clone git@github.com:mayakim0913/rawimage.git
 * Hex Viewer is Slow
 * Some exceptions might not be handled.
 * Can't load big endian image in auto detection mode
+

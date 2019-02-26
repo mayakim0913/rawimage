@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 #pylint:disble=missing-docstring
 #pylint:disable=no-name-in-module
-"""
 
+"""
 This script converts raw image to other image format
 Form implementation generated from reading ui file 'widget.ui'
 python: 3.6
-
 """
 
 from enum import Enum, IntEnum
@@ -653,12 +652,12 @@ class MainWindow(QMainWindow):
 
     def help(self):
         w = QWidget()
-        QMessageBox.information(w, "Help", "If you need any help, Please visit GitHub or mail to me \n E-mail: maya.kim@intel.com \n GitHub: https://github.com/mayakim0913/rawimage")
+        QMessageBox.information(w, "Help", "If you need any help, Please visit GitHub or email to me \n E-mail: maya.kim@intel.com \n GitHub: https://github.com/mayakim0913/rawimage")
 
 
     def about(self):
         w = QWidget()
-        QMessageBox.information(w, "About", "It loads Raw image files on Qt ui display and converts it to color format(YUV422, RGB888, RGB565, RGBA) and save to compression image format(JPEG, PNG)")
+        QMessageBox.information(w, "About", "* Raw image viewer loads and parses raw images into selected color format(YUV422, RGB888, RGB565, RGBA). \n * Version: V1.0.2019")
 
 
     def information(self):
@@ -678,7 +677,6 @@ class MainWindow(QMainWindow):
         info.append((' - Want to read file size(bytes): %d') % (int(buf)))
         info.append((' - Want to read file w*h: %d') % (int(buf / (bpp / 8))))
 
-
         _info = '\n'.join(info)
 
         self.label_info.setText(_info)
@@ -691,4 +689,3 @@ if __name__ == '__main__':
     WINDOW.setWindowTitle('Raw Image viewer')
     WINDOW.show()
     sys.exit(APP.exec_())
-
